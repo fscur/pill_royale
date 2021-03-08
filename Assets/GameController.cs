@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -9,10 +7,9 @@ namespace Pills.Assets
     public enum GameState
     {
         WaitingStart,
-        SpawningNextPill,
         Playing,
         ResolvingBlows,
-        MakingCellsFall
+        GameOver
     }
 
     public class GameController : MonoBehaviour
@@ -21,17 +18,14 @@ namespace Pills.Assets
         {
             MoveDown,
             MoveLeft,
-            MoveRight,
-            RotateClockwise,
-            RotateCounterClockwise
+            MoveRight
         }
 
         [SerializeField, Range(1, 4)] private int _difficulty = 1;
         [SerializeField, Range(1, 3)] private int _roundStartSpeed = 1;
         [SerializeField] private Tilemap _tilemap;
         [SerializeField] private Tile[] _pillTiles;
-        private int _lastDifficulty = 0;
-        private int _lastRoundStartSpeed = 0;
+
         private CellType[,] _board;
         private int _boardWidth = 10;
         private int _boardHeight = 18;
@@ -42,29 +36,28 @@ namespace Pills.Assets
         private float _inputSpeed;
         private float _keyDownSpeed;
         private float _roundTime;
-        private int _roundCount;
         private Pill _currentPill;
         private Pill _nextPill;
         private bool[] _keyIsDown;
         private float[] _timeSinceKeyDown;
         private GameState _state;
-        private Dictionary<Vector2, Cell> _blownCells = new Dictionary<Vector2, Cell>(8 * 16);
-        private Dictionary<Vector2, Tile> _tiles;
 
+        private readonly Queue<List<Cell>> _toBlowQueue = new Queue<List<Cell>>();
+        private readonly Queue<List<Cell>> _blownQueue = new Queue<List<Cell>>();
+        private readonly Dictionary<Vector2, List<Cell>> _cellGroups = new Dictionary<Vector2, List<Cell>>(10 * 18);
+        
         private void Start()
         {
-            _visitedCells = new int[_boardWidth, _boardHeight];
-            _tiles = new Dictionary<Vector2, Tile>(8 * 16);
             _keyIsDown = new bool[5];
             _timeSinceKeyDown = new float[5];
 
             _isPaused = true;
-            _roundSpeed = 1.0f / (Mathf.Pow(2.0f, (float)_roundStartSpeed - 1.0f));
+            _roundSpeed = 1.0f / (Mathf.Pow(2.0f, (float) _roundStartSpeed - 1.0f));
             _roundTime = 0.0f;
             _inputTime = 0.0f;
             _inputSpeed = 1.0f / 50.0f;
             _keyDownSpeed = 0.25f;
-            _roundCount = 0;
+
             ResetBoard();
             //InitializeVirusesPositions();
             _nextPill = Pill.SpawnPill(4, _boardHeight + 1, CellOrientation.Right);
@@ -77,27 +70,9 @@ namespace Pills.Assets
             _currentPill.Translate(0, -3);
             var cell0 = _currentPill.Cells[0];
             var cell1 = _currentPill.Cells[1];
-            _board[(int)cell0.Position.x, (int)cell0.Position.y] = cell0.Type;
-            _board[(int)cell1.Position.x, (int)cell1.Position.y] = cell1.Type;
+            _board[(int) cell0.Position.x, (int) cell0.Position.y] = cell0.Type;
+            _board[(int) cell1.Position.x, (int) cell1.Position.y] = cell1.Type;
             _nextPill = Pill.SpawnPill(4, _boardHeight + 1, CellOrientation.Right);
-        }
-
-        private void VisitedCells()
-        {
-            _visitedCells = new int[_boardWidth, _boardHeight];
-
-            int x, y;
-            for (x = 1; x < _boardWidth - 1; ++x)
-            {
-                for (y = 1; y < _boardHeight - 1; ++y)
-                {
-                    _visitedCells[x, y] = 0;
-                }
-            }
-
-            // _board[3, 4] = CellType.Red;
-            // _board[3, 5] = CellType.Red;
-            // _board[3, 6] = CellType.Red;
         }
 
         private void ResetBoard()
@@ -119,9 +94,16 @@ namespace Pills.Assets
                 }
             }
 
-            // _board[3, 4] = CellType.Red;
-            // _board[3, 5] = CellType.Red;
-            // _board[3, 6] = CellType.Red;
+            _board[2, 1] = CellType.Red;
+            _board[2, 2] = CellType.Red;
+            _board[2, 3] = CellType.Red;
+            _board[3, 1] = CellType.Blue;
+            _board[3, 2] = CellType.Blue;
+            _board[3, 3] = CellType.Blue;
+            //_board[3, 5] = CellType.Blue;
+            //_board[3, 6] = CellType.Blue;
+            //_board[3, 7] = CellType.Red;
+            //_board[2, 7] = CellType.Red;
         }
 
         private bool IsWall(int x, int y)
@@ -136,7 +118,7 @@ namespace Pills.Assets
 
             while (maxViruses-- > 0)
             {
-            try_set_color:
+                try_set_color:
                 x = UnityEngine.Random.Range(0, _boardWidth);
                 y = UnityEngine.Random.Range(0, _boardHeight - _minConsecutiveCells);
 
@@ -144,7 +126,7 @@ namespace Pills.Assets
                     goto try_set_color;
 
                 var color = UnityEngine.Random.Range(2, 5);
-                CellType cellType = (CellType)(1 << color) | CellType.Virus;
+                CellType cellType = (CellType) (1 << color) | CellType.Virus;
 
                 if (!CanPlaceVirus(x, y, cellType))
                     goto try_set_color;
@@ -203,22 +185,14 @@ namespace Pills.Assets
             return true;
         }
 
-        public void Update()
+        public void LateUpdate()
         {
-            // UnityEngine.Debug.Log("input time: " + _inputTime);
-            // UnityEngine.Debug.Log("input speed: " + _inputSpeed);
-            // UnityEngine.Debug.Log("round time: " + _roundTime);
-            // UnityEngine.Debug.Log("round speed: " + _roundSpeed);
-            // UnityEngine.Debug.Log("keydown down: " + _keyIsDown[(int)InputAction.MoveDown]);
-            // UnityEngine.Debug.Log("keydown left: " + _keyIsDown[(int)InputAction.MoveLeft]);
-            // UnityEngine.Debug.Log("keydown right: " + _keyIsDown[(int)InputAction.MoveRight]);
-            // UnityEngine.Debug.Log("time keydown down: " + _timeSinceKeyDown[(int)InputAction.MoveDown]);
-            // UnityEngine.Debug.Log("time keydown left: " + _timeSinceKeyDown[(int)InputAction.MoveLeft]);
-            // UnityEngine.Debug.Log("time keydown right: " + _timeSinceKeyDown[(int)InputAction.MoveRight]);
-
+            if (_state == GameState.GameOver)
+            {
+                return;
+            }
+            
             ResetInputIfNeeded();
-
-            DrawBoard();
 
             if (Input.GetKeyDown(KeyCode.P))
             {
@@ -231,16 +205,18 @@ namespace Pills.Assets
                 _isPaused = !_isPaused;
             }
 
-
             if (_isPaused)
+            {
                 return;
+            }
 
             _inputTime += Time.unscaledDeltaTime;
             _roundTime += Time.unscaledDeltaTime;
 
-            if (_state == GameState.Playing &&
-                _currentPill != null)
+            if (_state == GameState.Playing && _currentPill != null)
+            {
                 HandleInput();
+            }
 
             if (_inputTime > _inputSpeed)
             {
@@ -248,42 +224,56 @@ namespace Pills.Assets
             }
 
             if (_roundTime <= _roundSpeed)
+            {
                 return;
+            }
+
+            // UnityEngine.Debug.Log("input time: " + _inputTime);
+            // UnityEngine.Debug.Log("input speed: " + _inputSpeed);
+            // UnityEngine.Debug.Log("round time: " + _roundTime);
+            // UnityEngine.Debug.Log("round speed: " + _roundSpeed);
+            // UnityEngine.Debug.Log("keydown down: " + _keyIsDown[(int)InputAction.MoveDown]);
+            // UnityEngine.Debug.Log("keydown left: " + _keyIsDown[(int)InputAction.MoveLeft]);
+            // UnityEngine.Debug.Log("keydown right: " + _keyIsDown[(int)InputAction.MoveRight]);
+            // UnityEngine.Debug.Log("time keydown down: " + _timeSinceKeyDown[(int)InputAction.MoveDown]);
+            // UnityEngine.Debug.Log("time keydown left: " + _timeSinceKeyDown[(int)InputAction.MoveLeft]);
+            // UnityEngine.Debug.Log("time keydown right: " + _timeSinceKeyDown[(int)InputAction.MoveRight]);
 
             _roundTime = 0.0f;
-            _roundCount++;
 
-            switch (_state)
-            {
-                case GameState.WaitingStart:
-                    return;
-                case GameState.Playing:
-                    RunRound();
-                    break;
-                case GameState.ResolvingBlows:
-                    ResolveBlows();
-                    break;
-            }
+            if (_state == GameState.WaitingStart)
+                return;
+
+            if (_state == GameState.Playing)
+                RunRound();
+
+            if (_state == GameState.ResolvingBlows)
+                ResolveBlows();
+        }
+
+        private void Update()
+        {
+            DrawBoard();
         }
 
         private void ResetInputIfNeeded()
         {
             if (Input.GetKeyUp(KeyCode.DownArrow))
             {
-                _keyIsDown[(int)InputAction.MoveDown] = false;
-                _timeSinceKeyDown[(int)InputAction.MoveDown] = 0;
+                _keyIsDown[(int) InputAction.MoveDown] = false;
+                _timeSinceKeyDown[(int) InputAction.MoveDown] = 0;
             }
 
             if (Input.GetKeyUp(KeyCode.LeftArrow))
             {
-                _keyIsDown[(int)InputAction.MoveLeft] = false;
-                _timeSinceKeyDown[(int)InputAction.MoveLeft] = 0;
+                _keyIsDown[(int) InputAction.MoveLeft] = false;
+                _timeSinceKeyDown[(int) InputAction.MoveLeft] = 0;
             }
 
             if (Input.GetKeyUp(KeyCode.RightArrow))
             {
-                _keyIsDown[(int)InputAction.MoveRight] = false;
-                _timeSinceKeyDown[(int)InputAction.MoveRight] = 0;
+                _keyIsDown[(int) InputAction.MoveRight] = false;
+                _timeSinceKeyDown[(int) InputAction.MoveRight] = 0;
             }
         }
 
@@ -308,10 +298,10 @@ namespace Pills.Assets
 
         private void DrawPill(Pill pill)
         {
-            var x0 = (int)pill.Cells[0].Position.x;
-            var y0 = (int)pill.Cells[0].Position.y;
-            var x1 = (int)pill.Cells[1].Position.x;
-            var y1 = (int)pill.Cells[1].Position.y;
+            var x0 = (int) pill.Cells[0].Position.x;
+            var y0 = (int) pill.Cells[0].Position.y;
+            var x1 = (int) pill.Cells[1].Position.x;
+            var y1 = (int) pill.Cells[1].Position.y;
 
             CellType cellType0 = pill.Cells[0].Type;
             CellType cellType1 = pill.Cells[1].Type;
@@ -400,11 +390,20 @@ namespace Pills.Assets
                 case CellType.BlueVirus:
                     tile = _pillTiles[17];
                     break;
-                case CellType.Empty:
+                case CellType.RedBlown:
                     tile = _pillTiles[18];
                     break;
+                case CellType.YellowBlown:
+                    tile = _pillTiles[19];
+                    break;
+                case CellType.BlueBlown:
+                    tile = _pillTiles[20];
+                    break;
+                case CellType.Empty:
+                    tile = _pillTiles[21];
+                    break;
                 default:
-                    tile = _pillTiles[18];
+                    tile = _pillTiles[21];
                     break;
             }
 
@@ -424,98 +423,104 @@ namespace Pills.Assets
         {
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                _keyIsDown[(int)InputAction.MoveDown] = true;
+                _keyIsDown[(int) InputAction.MoveDown] = true;
 
-                if (CanMovePill(MovementDirection.Down))
+                if (CanMovePill(_currentPill, MovementDirection.Down))
                     MovePillDown();
             }
 
-            if (_keyIsDown[(int)InputAction.MoveDown])
-                _timeSinceKeyDown[(int)InputAction.MoveDown] += Time.unscaledDeltaTime;
+            if (_keyIsDown[(int) InputAction.MoveDown])
+                _timeSinceKeyDown[(int) InputAction.MoveDown] += Time.unscaledDeltaTime;
 
-            if (_inputTime > _inputSpeed)
-            {
-                if (_keyIsDown[(int)InputAction.MoveDown] &&
-                    _timeSinceKeyDown[(int)InputAction.MoveDown] > _keyDownSpeed)
-                {
-                    if (CanMovePill(MovementDirection.Down))
-                        MovePillDown();
-                }
-            }
+            if (!(_inputTime > _inputSpeed))
+                return;
+
+            if (!_keyIsDown[(int) InputAction.MoveDown] ||
+                !(_timeSinceKeyDown[(int) InputAction.MoveDown] > _keyDownSpeed))
+                return;
+
+            if (CanMovePill(_currentPill, MovementDirection.Down))
+                MovePillDown();
         }
 
         private void HandleMoveLeft()
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                _keyIsDown[(int)InputAction.MoveLeft] = true;
+                _keyIsDown[(int) InputAction.MoveLeft] = true;
 
-                if (CanMovePill(MovementDirection.Left))
+                if (CanMovePill(_currentPill, MovementDirection.Left))
                     MovePillLeft();
             }
 
-            if (_keyIsDown[(int)InputAction.MoveLeft])
-                _timeSinceKeyDown[(int)InputAction.MoveLeft] += Time.unscaledDeltaTime;
+            if (_keyIsDown[(int) InputAction.MoveLeft])
+                _timeSinceKeyDown[(int) InputAction.MoveLeft] += Time.unscaledDeltaTime;
 
-            if (_inputTime > _inputSpeed)
-            {
-                if (_keyIsDown[(int)InputAction.MoveLeft] &&
-                    _timeSinceKeyDown[(int)InputAction.MoveLeft] > _keyDownSpeed)
-                {
-                    if (CanMovePill(MovementDirection.Left))
-                        MovePillLeft();
-                }
-            }
+            if (!(_inputTime > _inputSpeed))
+                return;
+
+            if (!_keyIsDown[(int) InputAction.MoveLeft] || !(_timeSinceKeyDown[(int) InputAction.MoveLeft] > _keyDownSpeed))
+                return;
+
+            if (CanMovePill(_currentPill, MovementDirection.Left))
+                MovePillLeft();
         }
 
         private void HandleMoveRight()
         {
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                _keyIsDown[(int)InputAction.MoveRight] = true;
+                _keyIsDown[(int) InputAction.MoveRight] = true;
 
-                if (CanMovePill(MovementDirection.Right))
+                if (CanMovePill(_currentPill, MovementDirection.Right))
                     MovePillRight();
             }
 
-            if (_keyIsDown[(int)InputAction.MoveRight])
-                _timeSinceKeyDown[(int)InputAction.MoveRight] += Time.unscaledDeltaTime;
+            if (_keyIsDown[(int) InputAction.MoveRight])
+                _timeSinceKeyDown[(int) InputAction.MoveRight] += Time.unscaledDeltaTime;
 
-            if (_inputTime > _inputSpeed)
-            {
-                if (_keyIsDown[(int)InputAction.MoveRight] &&
-                    _timeSinceKeyDown[(int)InputAction.MoveRight] > _keyDownSpeed)
-                {
-                    if (CanMovePill(MovementDirection.Right))
-                        MovePillRight();
-                }
-            }
+            if (!(_inputTime > _inputSpeed))
+                return;
+
+            if (!_keyIsDown[(int) InputAction.MoveRight] || !(_timeSinceKeyDown[(int) InputAction.MoveRight] > _keyDownSpeed))
+                return;
+
+            if (CanMovePill(_currentPill, MovementDirection.Right))
+                MovePillRight();
         }
 
         private void HandleRotateClockwise()
         {
-            if (Input.GetKeyDown(KeyCode.F))
+            if (!Input.GetKeyDown(KeyCode.S))
+                return;
+
+            if (CanRotatePill(RotationDirection.Clockwise))
             {
-                if (CanRotatePill(RotationDirection.Clockwise))
+                RotatePillClockwise();
+            }
+            else
+            {
+                switch (_currentPill.Orientation)
                 {
-                    RotatePillClockwise();
-                }
-                else if (_currentPill.Orientation == CellOrientation.Up ||
-                        _currentPill.Orientation == CellOrientation.Down)
-                {
-                    if (CanMovePillLeft())
+                    case CellOrientation.Up:
+                    case CellOrientation.Down:
                     {
+                        if (!CanMovePillLeft(_currentPill))
+                            return;
+
                         MovePillLeft();
                         RotatePillClockwise();
+                        break;
                     }
-                }
-                else if (_currentPill.Orientation == CellOrientation.Right ||
-                        _currentPill.Orientation == CellOrientation.Left)
-                {
-                    if (CanMovePillDown())
+                    case CellOrientation.Right:
+                    case CellOrientation.Left:
                     {
+                        if (!CanMovePillDown(_currentPill))
+                            return;
+
                         MovePillDown();
                         RotatePillClockwise();
+                        break;
                     }
                 }
             }
@@ -523,28 +528,36 @@ namespace Pills.Assets
 
         private void HandleRotateCounterClockwise()
         {
-            if (Input.GetKeyDown(KeyCode.A))
+            if (!Input.GetKeyDown(KeyCode.A))
+                return;
+
+            if (CanRotatePill(RotationDirection.CounterClockwise))
             {
-                if (CanRotatePill(RotationDirection.CounterClockwise))
+                RotatePillCounterClockwise();
+            }
+            else
+            {
+                switch (_currentPill.Orientation)
                 {
-                    RotatePillCounterClockwise();
-                }
-                else if (_currentPill.Orientation == CellOrientation.Up ||
-                        _currentPill.Orientation == CellOrientation.Down)
-                {
-                    if (CanMovePillRight())
+                    case CellOrientation.Up:
+                    case CellOrientation.Down:
                     {
+                        if (!CanMovePillRight(_currentPill))
+                            return;
+
                         MovePillRight();
                         RotatePillCounterClockwise();
+                        break;
                     }
-                }
-                else if (_currentPill.Orientation == CellOrientation.Right ||
-                        _currentPill.Orientation == CellOrientation.Left)
-                {
-                    if (CanMovePillDown())
+                    case CellOrientation.Right:
+                    case CellOrientation.Left:
                     {
+                        if (!CanMovePillDown(_currentPill))
+                            return;
+
                         MovePillDown();
                         RotatePillCounterClockwise();
+                        break;
                     }
                 }
             }
@@ -554,103 +567,96 @@ namespace Pills.Assets
         {
             Vector2 posCell0 = _currentPill.Cells[0].Position;
             Vector2 posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = CellType.Empty;
-            _board[(int)posCell1.x, (int)posCell1.y] = CellType.Empty;
+            _board[(int) posCell0.x, (int) posCell0.y] = CellType.Empty;
+            _board[(int) posCell1.x, (int) posCell1.y] = CellType.Empty;
 
             _currentPill.MoveDown();
 
             posCell0 = _currentPill.Cells[0].Position;
             posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = _currentPill.Cells[0].Type;
-            _board[(int)posCell1.x, (int)posCell1.y] = _currentPill.Cells[1].Type;
-        }
-
-        private void MovePillUp()
-        {
-            Vector2 posCell0 = _currentPill.Cells[0].Position;
-            Vector2 posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = CellType.Empty;
-            _board[(int)posCell1.x, (int)posCell1.y] = CellType.Empty;
-
-            _currentPill.MoveUp();
-
-            posCell0 = _currentPill.Cells[0].Position;
-            posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = _currentPill.Cells[0].Type;
-            _board[(int)posCell1.x, (int)posCell1.y] = _currentPill.Cells[1].Type;
+            _board[(int) posCell0.x, (int) posCell0.y] = _currentPill.Cells[0].Type;
+            _board[(int) posCell1.x, (int) posCell1.y] = _currentPill.Cells[1].Type;
         }
 
         private void MovePillLeft()
         {
             Vector2 posCell0 = _currentPill.Cells[0].Position;
             Vector2 posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = CellType.Empty;
-            _board[(int)posCell1.x, (int)posCell1.y] = CellType.Empty;
+            _board[(int) posCell0.x, (int) posCell0.y] = CellType.Empty;
+            _board[(int) posCell1.x, (int) posCell1.y] = CellType.Empty;
 
             _currentPill.MoveLeft();
 
             posCell0 = _currentPill.Cells[0].Position;
             posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = _currentPill.Cells[0].Type;
-            _board[(int)posCell1.x, (int)posCell1.y] = _currentPill.Cells[1].Type;
+            _board[(int) posCell0.x, (int) posCell0.y] = _currentPill.Cells[0].Type;
+            _board[(int) posCell1.x, (int) posCell1.y] = _currentPill.Cells[1].Type;
         }
 
         private void MovePillRight()
         {
             Vector2 posCell0 = _currentPill.Cells[0].Position;
             Vector2 posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = CellType.Empty;
-            _board[(int)posCell1.x, (int)posCell1.y] = CellType.Empty;
+            _board[(int) posCell0.x, (int) posCell0.y] = CellType.Empty;
+            _board[(int) posCell1.x, (int) posCell1.y] = CellType.Empty;
 
             _currentPill.MoveRight();
 
             posCell0 = _currentPill.Cells[0].Position;
             posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = _currentPill.Cells[0].Type;
-            _board[(int)posCell1.x, (int)posCell1.y] = _currentPill.Cells[1].Type;
+            _board[(int) posCell0.x, (int) posCell0.y] = _currentPill.Cells[0].Type;
+            _board[(int) posCell1.x, (int) posCell1.y] = _currentPill.Cells[1].Type;
         }
 
-        private bool CanMovePill(MovementDirection direction)
+        private bool CanMovePill(Pill pill, MovementDirection direction)
         {
             switch (direction)
             {
                 case MovementDirection.Down:
-                    return CanMovePillDown();
+                    return CanMovePillDown(pill);
                 case MovementDirection.Left:
-                    return CanMovePillLeft();
+                    return CanMovePillLeft(pill);
                 case MovementDirection.Right:
-                    return CanMovePillRight();
+                    return CanMovePillRight(pill);
             }
 
             return true;
         }
 
-        private bool CanMovePillDown()
+        private bool CanMovePill(Pill pill)
+        {
+            return CanMovePillDown(pill) ||
+                   CanMovePillLeft(pill) ||
+                   CanMovePillRight(pill);
+
+        }
+
+        private bool CanMovePillDown(Pill pill)
         {
             int x0 = 0;
             int y0 = 0;
             int x1 = 0;
             int y1 = 0;
 
-            int mainCell = _currentPill.Cells[0].IsMainCell ? 0 : 1;
-            int otherCell = _currentPill.Cells[1].IsMainCell ? 0 : 1;
+            int mainCell = pill.Cells[0].IsMainCell ? 0 : 1;
+            int otherCell = pill.Cells[1].IsMainCell ? 0 : 1;
 
-            if (_currentPill.Orientation == CellOrientation.Up)
+            if (pill.Orientation == CellOrientation.Up)
             {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y - 1;
+                x0 = (int) pill.Cells[mainCell].Position.x;
+                y0 = (int) pill.Cells[mainCell].Position.y - 1;
             }
-            else if (_currentPill.Orientation == CellOrientation.Down)
+            else if (pill.Orientation == CellOrientation.Down)
             {
-                x0 = (int)_currentPill.Cells[otherCell].Position.x;
-                y0 = (int)_currentPill.Cells[otherCell].Position.y - 1;
+                x0 = (int) pill.Cells[otherCell].Position.x;
+                y0 = (int) pill.Cells[otherCell].Position.y - 1;
             }
             else
             {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y - 1;
-                x1 = (int)_currentPill.Cells[otherCell].Position.x;
-                y1 = (int)_currentPill.Cells[otherCell].Position.y - 1;
+                x0 = (int) pill.Cells[mainCell].Position.x;
+                y0 = (int) pill.Cells[mainCell].Position.y - 1;
+                x1 = (int) pill.Cells[otherCell].Position.x;
+                y1 = (int) pill.Cells[otherCell].Position.y - 1;
 
                 if (y1 < 1)
                     return false;
@@ -665,32 +671,32 @@ namespace Pills.Assets
             return _board[x0, y0] == CellType.Empty;
         }
 
-        private bool CanMovePillUp()
+        private bool CanMovePillLeft(Pill pill)
         {
             int x0 = 0;
             int y0 = 0;
             int x1 = 0;
             int y1 = 0;
 
-            int mainCell = _currentPill.Cells[0].IsMainCell ? 0 : 1;
-            int otherCell = _currentPill.Cells[1].IsMainCell ? 0 : 1;
+            int mainCell = pill.Cells[0].IsMainCell ? 0 : 1;
+            int otherCell = pill.Cells[1].IsMainCell ? 0 : 1;
 
-            if (_currentPill.Orientation == CellOrientation.Down)
+            if (pill.Orientation == CellOrientation.Left)
             {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y + 1;
+                x0 = (int) pill.Cells[otherCell].Position.x - 1;
+                y0 = (int) pill.Cells[otherCell].Position.y;
             }
-            else if (_currentPill.Orientation == CellOrientation.Up)
+            else if (pill.Orientation == CellOrientation.Right)
             {
-                x0 = (int)_currentPill.Cells[otherCell].Position.x;
-                y0 = (int)_currentPill.Cells[otherCell].Position.y + 1;
+                x0 = (int) pill.Cells[mainCell].Position.x - 1;
+                y0 = (int) pill.Cells[mainCell].Position.y;
             }
             else
             {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y + 1;
-                x1 = (int)_currentPill.Cells[otherCell].Position.x;
-                y1 = (int)_currentPill.Cells[otherCell].Position.y + 1;
+                x0 = (int) pill.Cells[mainCell].Position.x - 1;
+                y0 = (int) pill.Cells[mainCell].Position.y;
+                x1 = (int) pill.Cells[otherCell].Position.x - 1;
+                y1 = (int) pill.Cells[otherCell].Position.y;
 
                 if (_board[x1, y1] != CellType.Empty)
                     return false;
@@ -699,66 +705,32 @@ namespace Pills.Assets
             return _board[x0, y0] == CellType.Empty;
         }
 
-        private bool CanMovePillLeft()
+        private bool CanMovePillRight(Pill pill)
         {
             int x0 = 0;
             int y0 = 0;
             int x1 = 0;
             int y1 = 0;
 
-            int mainCell = _currentPill.Cells[0].IsMainCell ? 0 : 1;
-            int otherCell = _currentPill.Cells[1].IsMainCell ? 0 : 1;
+            int mainCell = pill.Cells[0].IsMainCell ? 0 : 1;
+            int otherCell = pill.Cells[1].IsMainCell ? 0 : 1;
 
-            if (_currentPill.Orientation == CellOrientation.Left)
+            if (pill.Orientation == CellOrientation.Left)
             {
-                x0 = (int)_currentPill.Cells[otherCell].Position.x - 1;
-                y0 = (int)_currentPill.Cells[otherCell].Position.y;
+                x0 = (int) pill.Cells[mainCell].Position.x + 1;
+                y0 = (int) pill.Cells[mainCell].Position.y;
             }
-            else if (_currentPill.Orientation == CellOrientation.Right)
+            else if (pill.Orientation == CellOrientation.Right)
             {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x - 1;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y;
-            }
-            else
-            {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x - 1;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y;
-                x1 = (int)_currentPill.Cells[otherCell].Position.x - 1;
-                y1 = (int)_currentPill.Cells[otherCell].Position.y;
-
-                if (_board[x1, y1] != CellType.Empty)
-                    return false;
-            }
-
-            return _board[x0, y0] == CellType.Empty;
-        }
-
-        private bool CanMovePillRight()
-        {
-            int x0 = 0;
-            int y0 = 0;
-            int x1 = 0;
-            int y1 = 0;
-
-            int mainCell = _currentPill.Cells[0].IsMainCell ? 0 : 1;
-            int otherCell = _currentPill.Cells[1].IsMainCell ? 0 : 1;
-
-            if (_currentPill.Orientation == CellOrientation.Left)
-            {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x + 1;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y;
-            }
-            else if (_currentPill.Orientation == CellOrientation.Right)
-            {
-                x0 = (int)_currentPill.Cells[otherCell].Position.x + 1;
-                y0 = (int)_currentPill.Cells[otherCell].Position.y;
+                x0 = (int) pill.Cells[otherCell].Position.x + 1;
+                y0 = (int) pill.Cells[otherCell].Position.y;
             }
             else
             {
-                x0 = (int)_currentPill.Cells[mainCell].Position.x + 1;
-                y0 = (int)_currentPill.Cells[mainCell].Position.y;
-                x1 = (int)_currentPill.Cells[otherCell].Position.x + 1;
-                y1 = (int)_currentPill.Cells[otherCell].Position.y;
+                x0 = (int) pill.Cells[mainCell].Position.x + 1;
+                y0 = (int) pill.Cells[mainCell].Position.y;
+                x1 = (int) pill.Cells[otherCell].Position.x + 1;
+                y1 = (int) pill.Cells[otherCell].Position.y;
 
                 if (_board[x1, y1] != CellType.Empty)
                     return false;
@@ -787,22 +759,21 @@ namespace Pills.Assets
             switch (_currentPill.Orientation)
             {
                 case CellOrientation.Right:
-                    x0 = (int)_currentPill.Cells[otherCell].Position.x - 1;
-                    y0 = (int)_currentPill.Cells[otherCell].Position.y + 1;
+                    x0 = (int) _currentPill.Cells[otherCell].Position.x - 1;
+                    y0 = (int) _currentPill.Cells[otherCell].Position.y + 1;
                     break;
                 case CellOrientation.Up:
-                    x0 = (int)_currentPill.Cells[mainCell].Position.x + 1;
-                    y0 = (int)_currentPill.Cells[mainCell].Position.y;
+                    x0 = (int) _currentPill.Cells[mainCell].Position.x + 1;
+                    y0 = (int) _currentPill.Cells[mainCell].Position.y;
                     break;
                 case CellOrientation.Left:
-                    x0 = (int)_currentPill.Cells[mainCell].Position.x - 1;
-                    y0 = (int)_currentPill.Cells[mainCell].Position.y + 1;
+                    x0 = (int) _currentPill.Cells[mainCell].Position.x - 1;
+                    y0 = (int) _currentPill.Cells[mainCell].Position.y + 1;
                     break;
                 case CellOrientation.Down:
-                    x0 = (int)_currentPill.Cells[otherCell].Position.x + 1;
-                    y0 = (int)_currentPill.Cells[otherCell].Position.y;
+                    x0 = (int) _currentPill.Cells[otherCell].Position.x + 1;
+                    y0 = (int) _currentPill.Cells[otherCell].Position.y;
                     break;
-
             }
 
             return _board[x0, y0] == CellType.Empty;
@@ -819,20 +790,20 @@ namespace Pills.Assets
             switch (_currentPill.Orientation)
             {
                 case CellOrientation.Right:
-                    x0 = (int)_currentPill.Cells[mainCell].Position.x;
-                    y0 = (int)_currentPill.Cells[mainCell].Position.y + 1;
+                    x0 = (int) _currentPill.Cells[mainCell].Position.x;
+                    y0 = (int) _currentPill.Cells[mainCell].Position.y + 1;
                     break;
                 case CellOrientation.Down:
-                    x0 = (int)_currentPill.Cells[mainCell].Position.x + 1;
-                    y0 = (int)_currentPill.Cells[mainCell].Position.y - 1;
+                    x0 = (int) _currentPill.Cells[mainCell].Position.x + 1;
+                    y0 = (int) _currentPill.Cells[mainCell].Position.y - 1;
                     break;
                 case CellOrientation.Left:
-                    x0 = (int)_currentPill.Cells[otherCell].Position.x;
-                    y0 = (int)_currentPill.Cells[otherCell].Position.y + 1;
+                    x0 = (int) _currentPill.Cells[otherCell].Position.x;
+                    y0 = (int) _currentPill.Cells[otherCell].Position.y + 1;
                     break;
                 case CellOrientation.Up:
-                    x0 = (int)_currentPill.Cells[otherCell].Position.x + 1;
-                    y0 = (int)_currentPill.Cells[otherCell].Position.y - 1;
+                    x0 = (int) _currentPill.Cells[otherCell].Position.x + 1;
+                    y0 = (int) _currentPill.Cells[otherCell].Position.y - 1;
                     break;
             }
 
@@ -846,137 +817,127 @@ namespace Pills.Assets
         {
             Vector2 posCell0 = _currentPill.Cells[0].Position;
             Vector2 posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = CellType.Empty;
-            _board[(int)posCell1.x, (int)posCell1.y] = CellType.Empty;
+            _board[(int) posCell0.x, (int) posCell0.y] = CellType.Empty;
+            _board[(int) posCell1.x, (int) posCell1.y] = CellType.Empty;
 
             _currentPill.RotateClockwise();
 
             posCell0 = _currentPill.Cells[0].Position;
             posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = _currentPill.Cells[0].Type;
-            _board[(int)posCell1.x, (int)posCell1.y] = _currentPill.Cells[1].Type;
+            _board[(int) posCell0.x, (int) posCell0.y] = _currentPill.Cells[0].Type;
+            _board[(int) posCell1.x, (int) posCell1.y] = _currentPill.Cells[1].Type;
         }
 
         private void RotatePillCounterClockwise()
         {
             Vector2 posCell0 = _currentPill.Cells[0].Position;
             Vector2 posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = CellType.Empty;
-            _board[(int)posCell1.x, (int)posCell1.y] = CellType.Empty;
+            _board[(int) posCell0.x, (int) posCell0.y] = CellType.Empty;
+            _board[(int) posCell1.x, (int) posCell1.y] = CellType.Empty;
 
             _currentPill.RotateCounterClockwise();
 
             posCell0 = _currentPill.Cells[0].Position;
             posCell1 = _currentPill.Cells[1].Position;
-            _board[(int)posCell0.x, (int)posCell0.y] = _currentPill.Cells[0].Type;
-            _board[(int)posCell1.x, (int)posCell1.y] = _currentPill.Cells[1].Type;
-        }
-
-        private Pill SpawnPill()
-        {
-            return Pill.SpawnPill(12, _boardHeight - 1, CellOrientation.Right);
+            _board[(int) posCell0.x, (int) posCell0.y] = _currentPill.Cells[0].Type;
+            _board[(int) posCell1.x, (int) posCell1.y] = _currentPill.Cells[1].Type;
         }
 
         private void RunRound()
         {
-            if (!CanMovePill(MovementDirection.Down))
+            // if (NoVirusLeft())
+            // {
+            //     _state = GameState.GameOver;
+            //     return;
+            // }
+            
+            if (!CanMovePill(_currentPill, MovementDirection.Down))
             {
-                CheckBlows(_boardHeight);
-                CheckBlowsForPill();
+                var x = (int) _currentPill.Cells[0].Position.x;
+                var y = (int) _currentPill.Cells[0].Position.y;
 
-                if (_state == GameState.Playing)
+                if (ShouldResolveBlows(x, y))
                 {
-                    SetCurrentPill(_nextPill);
+                   _state = GameState.ResolvingBlows;
                     return;
                 }
 
-                if (_state == GameState.ResolvingBlows)
+                if (_state == GameState.Playing)
+                {
+                    if (!CanSpawnNextPill())
+                    {
+                        _state = GameState.GameOver;
+                        return;
+                    }
+                    
+                    SetCurrentPill(_nextPill);
                     return;
+                }
             }
 
             if (!_keyIsDown[0])
                 MovePillDown();
         }
 
-        private void CheckBlowsForPill()
+        private bool NoVirusLeft()
         {
-            int x = (int)_currentPill.Cells[0].Position.x;
-            int y = (int)_currentPill.Cells[0].Position.y;
+            for (int y = 2; y < _boardHeight - 1; ++y)
+            {
+                for (int x = 1; x < _boardWidth - 1; ++x)
+                {
+                    var cellType = _board[x, y];
+                    if (IsVirus(cellType))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private bool CanSpawnNextPill()
+        {
+            var x0 = 4;
+            var y0 = _boardHeight - 2;
+            var x1 = x0 + 1;
+            var y1 = y0;
+            
+            return _board[x0, y0] == CellType.Empty && _board[x1, y1] == CellType.Empty;
+        }
+
+        private bool ShouldResolveBlows(int x, int y)
+        {
             var cellType = _currentPill.Cells[0].Type;
 
-            var b = GetHorizontalBlownCells(x, y, cellType);
+            var horizontalCells = GetHorizontalBlownCells(x, y, cellType);
+            if (horizontalCells.Count > 0)
+            {
+                return true;
+            }
 
-            b.ForEach(c =>
-                {
-                    if (!_blownCells.ContainsKey(c.Position))
-                        _blownCells.Add(c.Position, c);
-                });
+            var verticalCells = GetVerticalBlownCells(x, y, cellType);
+            if (verticalCells.Count > 0)
+            {
+                return true;
+            }
 
-            var d = GetVerticalBlownCells(x, y, cellType);
-
-            d.ForEach(c =>
-                {
-                    if (!_blownCells.ContainsKey(c.Position))
-                        _blownCells.Add(c.Position, c);
-                });
-
-            x = (int)_currentPill.Cells[1].Position.x;
-            y = (int)_currentPill.Cells[1].Position.y;
+            x = (int) _currentPill.Cells[1].Position.x;
+            y = (int) _currentPill.Cells[1].Position.y;
             cellType = _currentPill.Cells[1].Type;
 
-            b = GetHorizontalBlownCells(x, y, cellType);
-
-            b.ForEach(c =>
-                {
-                    if (!_blownCells.ContainsKey(c.Position))
-                        _blownCells.Add(c.Position, c);
-                });
-
-            d = GetVerticalBlownCells(x, y, cellType);
-
-            d.ForEach(c =>
-                {
-                    if (!_blownCells.ContainsKey(c.Position))
-                        _blownCells.Add(c.Position, c);
-                });
-
-            if (_blownCells.Count > 0)
+            horizontalCells = GetHorizontalBlownCells(x, y, cellType);
+            if (horizontalCells.Count > 0)
             {
-                _state = GameState.ResolvingBlows;
-
-                foreach (var blownCell in _blownCells.Values)
-                {
-                    x = (int)blownCell.Position.x;
-                    y = (int)blownCell.Position.y;
-                    CellType blownCellType = _board[x, y];
-                    _board[x, y] = CellType.Empty;
-
-                    var blownCellOrientation = blownCellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
-                    switch (blownCellOrientation)
-                    {
-                        case CellType.Left:
-                            Split(x + 1, y, blownCellType);
-                            break;
-                        case CellType.Right:
-                            Split(x - 1, y, blownCellType);
-                            break;
-                        case CellType.Up:
-                            Split(x, y + 1, blownCellType);
-                            break;
-                        case CellType.Down:
-                            Split(x, y - 1, blownCellType);
-                            break;
-                    }
-                }
-
-                _blownCells.Clear();
+                return true;
             }
+
+            verticalCells = GetVerticalBlownCells(x, y, cellType);
+            return verticalCells.Count > 0;
         }
 
         private void Split(int x, int y, CellType blownCellType)
         {
-            var blownCellOrientation = blownCellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
-            var splitCellOrientation = _board[x, y] & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
+            var blownCellOrientation = GetCellOrientation(blownCellType);
+            var splitCellOrientation = GetCellOrientation(_board[x, y]);
 
             if (blownCellOrientation == CellType.Left && splitCellOrientation != CellType.Right)
                 return;
@@ -1008,62 +969,14 @@ namespace Pills.Assets
             if (isVirus)
                 return;
 
-            var cellColor = _board[x, y] & (CellType.Red | CellType.Blue | CellType.Yellow);
-            _board[x, y] = cellColor;
-        }
-
-        private void CheckBlowsForCell(int x, int y, CellType cellType)
-        {
-            GetHorizontalBlownCells(x, y, cellType)
-                .ForEach(c =>
-                {
-                    if (!_blownCells.ContainsKey(c.Position))
-                        _blownCells.Add(c.Position, c);
-                });
-
-            GetVerticalBlownCells(x, y, cellType)
-                .ForEach(c =>
-                {
-                    if (!_blownCells.ContainsKey(c.Position))
-                        _blownCells.Add(c.Position, c);
-                });
-
-            if (_blownCells.Count > 0)
-            {
-                foreach (var blownCell in _blownCells.Values)
-                {
-                    x = (int)blownCell.Position.x;
-                    y = (int)blownCell.Position.y;
-                    CellType blownCellType = _board[x, y];
-                    _board[x, y] = CellType.Empty;
-
-                    var blownCellOrientation = blownCellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
-                    switch (blownCellOrientation)
-                    {
-                        case CellType.Left:
-                            Split(x + 1, y, blownCellType);
-                            break;
-                        case CellType.Right:
-                            Split(x - 1, y, blownCellType);
-                            break;
-                        case CellType.Up:
-                            Split(x, y + 1, blownCellType);
-                            break;
-                        case CellType.Down:
-                            Split(x, y - 1, blownCellType);
-                            break;
-                    }
-
-                    _state = GameState.ResolvingBlows;
-                }
-            }
+            _board[x, y] = GetCellColor(_board[x, y]);
         }
 
         private List<Cell> GetHorizontalBlownCells(int x, int y, CellType cellType)
         {
             var tmp = x;
 
-            List<Cell> blownPositions = new List<Cell>();
+            var blownPositions = new List<Cell>();
 
             blownPositions.Add(CreateCell(x, y, cellType));
 
@@ -1084,13 +997,6 @@ namespace Pills.Assets
                 blownPositions.Clear();
 
             return blownPositions;
-        }
-
-        private bool CellsHaveSameColor(CellType cellType0, CellType cellType1)
-        {
-            var c0 = cellType0 & (CellType.Red | CellType.Blue | CellType.Yellow);
-            var c1 = cellType1 & (CellType.Red | CellType.Blue | CellType.Yellow);
-            return c0 == c1;
         }
 
         private List<Cell> GetVerticalBlownCells(int x, int y, CellType cellType)
@@ -1119,19 +1025,58 @@ namespace Pills.Assets
             return blownPositions;
         }
 
-        private Cell CreateCell(int x, int y, CellType type)
-        {
-            return new Cell
-            {
-                Type = type,
-                Position = new Vector2(x, y)
-            };
-        }
-
-        int[] _fallenCells = new int[10];
-        int[,] _visitedCells;
         private void ResolveBlows()
         {
+            CheckBlows(Direction.Vertical);
+            CheckBlows(Direction.Horizontal);
+
+            if (_blownQueue.Count > 0)
+            {
+                var blownGroup = _blownQueue.Dequeue();
+
+                foreach (var blownCell in blownGroup)
+                {
+                    var x = (int) blownCell.Position.x;
+                    var y = (int) blownCell.Position.y;
+                    _board[x, y] = CellType.Empty;
+                }
+            }
+
+            if (_toBlowQueue.Count > 0)
+            {
+                var toBlowGroup = _toBlowQueue.Dequeue();
+                
+                foreach (var blownCell in toBlowGroup)
+                {
+                    var x = (int) blownCell.Position.x;
+                    var y = (int) blownCell.Position.y;
+                    var blownCellType = _board[x, y];
+                    //todo: make animated
+                    
+                    //_board[x, y] = CellType.Empty;
+                    _board[x, y] = GetCellColor(blownCellType) | CellType.Blown;
+
+                    var blownCellOrientation = blownCellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
+                    switch (blownCellOrientation)
+                    {
+                        case CellType.Left:
+                            Split(x + 1, y, blownCellType);
+                            break;
+                        case CellType.Right:
+                            Split(x - 1, y, blownCellType);
+                            break;
+                        case CellType.Up:
+                            Split(x, y + 1, blownCellType);
+                            break;
+                        case CellType.Down:
+                            Split(x, y - 1, blownCellType);
+                            break;
+                    }
+                }
+                
+                _blownQueue.Enqueue(toBlowGroup);
+            }
+
             var fallenCells = 0;
 
             for (int y = 2; y < _boardHeight - 1; ++y)
@@ -1147,75 +1092,74 @@ namespace Pills.Assets
                     if (isVirus)
                         continue;
 
-                    var cell = CreateCell(x, y, cellType);
+                    if (_board[x, y - 1] != CellType.Empty)
+                        continue;
 
-                    if (_board[x, y - 1] == CellType.Empty)
+                    var canFall = true;
+                    var isSingleCell = (cellType & (CellType.Left | CellType.Right | CellType.Up | CellType.Down)) == CellType.Empty;
+
+                    if (!isSingleCell)
                     {
-                        var canFall = true;
-                        var isSingleCell = (cellType & (CellType.Left | CellType.Right | CellType.Up | CellType.Down)) == CellType.Empty;
+                        var cellOrientation = cellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
 
-                        if (!isSingleCell)
+                        switch (cellOrientation)
                         {
-                            var cellOrientation = cellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
+                            case CellType.Left:
+                                canFall = _board[x + 1, y - 1] == CellType.Empty;
+                                if (canFall)
+                                {
+                                    _board[x + 1, y - 1] = _board[x + 1, y];
+                                    _board[x + 1, y] = CellType.Empty;
+                                }
 
-                            switch (cellOrientation)
-                            {
-                                case CellType.Left:
-                                    canFall = _board[x + 1, y - 1] == CellType.Empty;
-                                    if (canFall)
-                                    {
-                                        _board[x + 1, y - 1] = _board[x + 1, y];
-                                        _board[x + 1, y] = CellType.Empty;
-                                        _fallenCells[x + 1] = y - 1;
-                                    }
-                                    break;
-                                case CellType.Right:
-                                    canFall = _board[x - 1, y - 1] == CellType.Empty;
-                                    if (canFall)
-                                    {
-                                        _board[x - 1, y - 1] = _board[x - 1, y];
-                                        _board[x - 1, y] = CellType.Empty;
-                                        _fallenCells[x - 1] = y - 1;
-                                    }
-                                    break;
-                            }
-                        }
+                                break;
+                            case CellType.Right:
+                                canFall = _board[x - 1, y - 1] == CellType.Empty;
+                                if (canFall)
+                                {
+                                    _board[x - 1, y - 1] = _board[x - 1, y];
+                                    _board[x - 1, y] = CellType.Empty;
+                                }
 
-                        if (canFall)
-                        {
-                            fallenCells++;
-                            _board[x, y - 1] = _board[x, y];
-                            _board[x, y] = CellType.Empty;
-                            _fallenCells[x] = y - 1;
+                                break;
                         }
                     }
+
+                    if (!canFall)
+                        continue;
+
+                    fallenCells++;
+                    _board[x, y - 1] = _board[x, y];
+                    _board[x, y] = CellType.Empty;
                 }
             }
 
-            if (fallenCells == 0)
-            {
-                _state = GameState.Playing;
-                SetCurrentPill(_nextPill);
-            }
+            if (fallenCells != 0 || _toBlowQueue.Count > 0 || _blownQueue.Count > 0)
+                return;
+
+            _cellGroups.Clear();
+            _state = GameState.Playing;
+            SetCurrentPill(_nextPill);
         }
 
-        private void CheckBlows(int direction)
+        private void CheckBlows(Direction direction)
         {
-            var i = direction + 1;
+            var i = direction == Direction.Vertical ? _boardHeight + 1 : _boardWidth + 1;
             var x = 0;
             var y = 0;
 
+            start:
             while (i < _boardWidth * _boardHeight)
             {
-                if (direction == _boardWidth)
+                if (direction == Direction.Horizontal)
                 {
-                    x = i % direction;
-                    y = i / direction;
+                    x = i % _boardWidth;
+                    y = i / _boardWidth;
                 }
                 else
                 {
-                    x = i / direction;
-                    y = i % direction;
+                    x = i / _boardHeight;
+                    y = i % _boardHeight;
                 }
 
                 if (_board[x, y] != CellType.Empty &&
@@ -1225,9 +1169,63 @@ namespace Pills.Assets
             }
 
             var currentColor = GetCellColor(_board[x, y]);
-            var groups = new List<List<Cell>>();
+
             var currentGroup = new List<Cell>();
 
+            AddCellToGroup(x, y, currentGroup);
+
+            while (++i < _boardWidth * _boardHeight)
+            {
+                if (direction == Direction.Horizontal)
+                {
+                    x = i % _boardWidth;
+                    y = i / _boardWidth;
+                }
+                else
+                {
+                    x = i / _boardHeight;
+                    y = i % _boardHeight;
+                }
+
+                if (_board[x, y] == CellType.Empty || _board[x, y] == CellType.Wall ||
+                    !CellsHaveSameColor(currentColor, GetCellColor(_board[x, y])))
+                {
+                    if (currentGroup.Count >= _minConsecutiveCells)
+                    {
+                        List<Cell> foundGroup = null;
+
+                        foreach (var cell in currentGroup)
+                        {
+                            if (!_cellGroups.TryGetValue(cell.Position, out foundGroup))
+                            {
+                                _cellGroups.Add(cell.Position, currentGroup);
+                                continue;
+                            }
+
+                            break;
+                        }
+
+                        if (foundGroup == null)
+                            _toBlowQueue.Enqueue(currentGroup);
+                        else
+                            foundGroup.AddRange(currentGroup);
+                    }
+
+                    if (_board[x, y] == CellType.Empty || _board[x, y] == CellType.Wall)
+                    {
+                        goto start;
+                    }
+
+                    currentGroup = new List<Cell>();
+                    currentColor = GetCellColor(_board[x, y]);
+                }
+
+                AddCellToGroup(x, y, currentGroup);
+            }
+        }
+
+        private void AddCellToGroup(int x, int y, List<Cell> currentGroup)
+        {
             var cell = new Cell()
             {
                 Position = new Vector2(x, y),
@@ -1235,57 +1233,37 @@ namespace Pills.Assets
             };
 
             currentGroup.Add(cell);
-
-            while (++i < _boardWidth * _boardHeight)
-            {
-                if (direction == _boardWidth)
-                {
-                    x = i % direction;
-                    y = i / direction;
-                }
-                else
-                {
-                    x = i / direction;
-                    y = i % direction;
-                }
-
-                if (_board[x, y] == CellType.Empty)
-                    continue;
-
-                if (_board[x, y] == CellType.Wall || !CellsHaveSameColor(currentColor, GetCellColor(_board[x, y])))
-                {
-                    if (currentGroup.Count >= _minConsecutiveCells)
-                    {
-                        groups.Add(currentGroup);
-                    }
-
-                    if (_board[x, y] == CellType.Wall)
-                    {
-                        i += 1;
-                        currentGroup = new List<Cell>();
-
-                        continue;
-                    }
-
-                    currentGroup = new List<Cell>();
-                    currentColor = GetCellColor(_board[x, y]);
-                }
-
-                cell = new Cell()
-                {
-                    Position = new Vector2(x, y),
-                    Type = _board[x, y]
-                };
-
-                currentGroup.Add(cell);
-            }
         }
-        Dictionary<CellType, List<Vector2>> groups = new Dictionary<CellType, List<Vector2>>();
 
+        private static Cell CreateCell(int x, int y, CellType type)
+        {
+            return new Cell
+            {
+                Type = type,
+                Position = new Vector2(x, y)
+            };
+        }
 
-        private CellType GetCellColor(CellType cellType)
+        private static CellType GetCellColor(CellType cellType)
         {
             return cellType & (CellType.Red | CellType.Blue | CellType.Yellow);
+        }
+
+        private static bool CellsHaveSameColor(CellType cellType0, CellType cellType1)
+        {
+            var c0 = cellType0 & (CellType.Red | CellType.Blue | CellType.Yellow);
+            var c1 = cellType1 & (CellType.Red | CellType.Blue | CellType.Yellow);
+            return c0 == c1;
+        }
+
+        private static CellType GetCellOrientation(CellType cellType)
+        {
+            return cellType & (CellType.Left | CellType.Right | CellType.Down | CellType.Up);
+        }
+        
+        private static bool IsVirus(CellType cellType)
+        {
+            return (cellType & CellType.Virus) == CellType.Virus;
         }
     }
 }

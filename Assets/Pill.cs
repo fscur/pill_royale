@@ -19,9 +19,9 @@ namespace Pills.Assets
 
         public static Pill SpawnPill(int x, int y, CellOrientation orientation)
         {
-            var color = UnityEngine.Random.Range(2, 5);
+            var color = UnityEngine.Random.Range(3, 6);
             CellType cellType0 = (CellType)(1 << color);
-            color = UnityEngine.Random.Range(2, 5);
+            color = UnityEngine.Random.Range(3, 6);
             CellType cellType1 = (CellType)(1 << color);
 
             Vector2 cell1Position = Vector2.zero;
