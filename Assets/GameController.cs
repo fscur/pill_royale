@@ -60,7 +60,7 @@ namespace Pills.Assets
             _keyDownSpeed = 0.25f;
 
             ResetBoard();
-            //InitializeVirusesPositions();
+            InitializeVirusesPositions();
             _nextPill = Pill.SpawnPill(4, _boardHeight + 1, CellOrientation.Right);
             _state = GameState.WaitingStart;
         }
@@ -95,12 +95,12 @@ namespace Pills.Assets
                 }
             }
 
-            _board[2, 1] = CellType.Red;
-            _board[2, 2] = CellType.Red;
-            _board[2, 3] = CellType.Red;
-            _board[2, 4] = CellType.Blue;
-            _board[2, 5] = CellType.Blue;
-            _board[2, 6] = CellType.Blue;
+            // _board[2, 1] = CellType.Red;
+            // _board[2, 2] = CellType.Red;
+            // _board[2, 3] = CellType.Red;
+            // _board[2, 4] = CellType.Blue;
+            // _board[2, 5] = CellType.Blue;
+            // _board[2, 6] = CellType.Blue;
             //_board[3, 5] = CellType.Blue;
             //_board[3, 6] = CellType.Blue;
             //_board[3, 7] = CellType.Red;
@@ -114,20 +114,19 @@ namespace Pills.Assets
 
         private void InitializeVirusesPositions()
         {
-            int x, y;
-            int maxViruses = 1 << _difficulty + 2;
+            var maxViruses = 1 << _difficulty + 2;
 
             while (maxViruses-- > 0)
             {
                 try_set_color:
-                x = UnityEngine.Random.Range(0, _boardWidth);
-                y = UnityEngine.Random.Range(0, _boardHeight - _minConsecutiveCells);
+                var x = UnityEngine.Random.Range(0, _boardWidth);
+                var y = UnityEngine.Random.Range(0, _boardHeight - _minConsecutiveCells);
 
                 if (_board[x, y] != 0)
                     goto try_set_color;
 
-                var color = UnityEngine.Random.Range(2, 5);
-                CellType cellType = (CellType) (1 << color) | CellType.Virus;
+                var color = UnityEngine.Random.Range(3, 6);
+                var cellType = (CellType) (1 << color) | CellType.Virus;
 
                 if (!CanPlaceVirus(x, y, cellType))
                     goto try_set_color;
@@ -849,11 +848,11 @@ namespace Pills.Assets
 
         private void Play()
         {
-            // if (NoVirusLeft())
-            // {
-            //     _state = GameState.GameOver;
-            //     return;
-            // }
+            if (NoVirusLeft())
+            {
+                _state = GameState.GameOver;
+                return;
+            }
             
             if (!CanMovePill(_currentPill, MovementDirection.Down))
             {
