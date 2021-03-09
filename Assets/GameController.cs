@@ -9,6 +9,7 @@ namespace Pills.Assets
         WaitingStart,
         Playing,
         ResolvingBlows,
+        FallingCells,
         GameOver
     }
 
@@ -97,9 +98,9 @@ namespace Pills.Assets
             _board[2, 1] = CellType.Red;
             _board[2, 2] = CellType.Red;
             _board[2, 3] = CellType.Red;
-            _board[3, 1] = CellType.Blue;
-            _board[3, 2] = CellType.Blue;
-            _board[3, 3] = CellType.Blue;
+            _board[2, 4] = CellType.Blue;
+            _board[2, 5] = CellType.Blue;
+            _board[2, 6] = CellType.Blue;
             //_board[3, 5] = CellType.Blue;
             //_board[3, 6] = CellType.Blue;
             //_board[3, 7] = CellType.Red;
@@ -245,10 +246,13 @@ namespace Pills.Assets
                 return;
 
             if (_state == GameState.Playing)
-                RunRound();
+                Play();
 
             if (_state == GameState.ResolvingBlows)
                 ResolveBlows();
+            
+            if (_state == GameState.FallingCells)
+                FallCells();
         }
 
         private void Update()
@@ -843,7 +847,7 @@ namespace Pills.Assets
             _board[(int) posCell1.x, (int) posCell1.y] = _currentPill.Cells[1].Type;
         }
 
-        private void RunRound()
+        private void Play()
         {
             // if (NoVirusLeft())
             // {
@@ -1030,7 +1034,7 @@ namespace Pills.Assets
             CheckBlows(Direction.Vertical);
             CheckBlows(Direction.Horizontal);
 
-            if (_blownQueue.Count > 0)
+            while (_blownQueue.Count > 0)
             {
                 var blownGroup = _blownQueue.Dequeue();
 
@@ -1042,7 +1046,7 @@ namespace Pills.Assets
                 }
             }
 
-            if (_toBlowQueue.Count > 0)
+            while (_toBlowQueue.Count > 0)
             {
                 var toBlowGroup = _toBlowQueue.Dequeue();
                 
@@ -1077,6 +1081,15 @@ namespace Pills.Assets
                 _blownQueue.Enqueue(toBlowGroup);
             }
 
+            if (_blownQueue.Count == 0)
+            {
+                _state = GameState.FallingCells;
+                _cellGroups.Clear();
+            }
+        }
+
+        private void FallCells()
+        {
             var fallenCells = 0;
 
             for (int y = 2; y < _boardHeight - 1; ++y)
@@ -1134,8 +1147,19 @@ namespace Pills.Assets
                 }
             }
 
-            if (fallenCells != 0 || _toBlowQueue.Count > 0 || _blownQueue.Count > 0)
+            if (fallenCells != 0)
+            {
+                CheckBlows(Direction.Vertical);
+                CheckBlows(Direction.Horizontal);
+
+                if (_toBlowQueue.Count <= 0) 
+                    return;
+                
+                _state = GameState.ResolvingBlows;
+                _cellGroups.Clear();
+
                 return;
+            }
 
             _cellGroups.Clear();
             _state = GameState.Playing;
@@ -1208,7 +1232,15 @@ namespace Pills.Assets
                         if (foundGroup == null)
                             _toBlowQueue.Enqueue(currentGroup);
                         else
-                            foundGroup.AddRange(currentGroup);
+                        {
+                            foreach (var cell in currentGroup)
+                            {
+                                if (foundGroup.Find(c => c.Position == cell.Position) == null)
+                                {
+                                    foundGroup.Add(cell);                                    
+                                }
+                            }
+                        }
                     }
 
                     if (_board[x, y] == CellType.Empty || _board[x, y] == CellType.Wall)
