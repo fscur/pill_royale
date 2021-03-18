@@ -15,7 +15,6 @@
           <e p="Cell.cs" t="Include" />
           <e p="Direction.cs" t="Include" />
           <e p="GameConstants.cs" t="Include" />
-          <e p="GameController.cs" t="Include" />
           <e p="MovementDirection.cs" t="Include" />
           <e p="Pill.cs" t="Include" />
           <e p="PlayerController.cs" t="Include" />

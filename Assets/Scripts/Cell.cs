@@ -54,7 +54,7 @@ namespace Pills.Assets
             return cellType & (CellType.Red | CellType.Blue | CellType.Yellow);
         }
 
-        public static bool CellsHaveSameColor(CellType cellType0, CellType cellType1)
+        public static bool HaveSameColor(CellType cellType0, CellType cellType1)
         {
             var c0 = cellType0 & (CellType.Red | CellType.Blue | CellType.Yellow);
             var c1 = cellType1 & (CellType.Red | CellType.Blue | CellType.Yellow);
@@ -70,5 +70,10 @@ namespace Pills.Assets
         {
             return (cellType & CellType.Virus) == CellType.Virus;
         }
+
+        public static bool IsSingleCell(CellType cellType)
+        {
+            return (cellType & (CellType.Left | CellType.Right | CellType.Up | CellType.Down)) == CellType.Empty;
+        } 
     }
 }

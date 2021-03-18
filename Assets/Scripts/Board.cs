@@ -77,10 +77,49 @@ namespace Pills.Assets
                     if (!shouldSpawn)
                         continue;
                     
+                    trySetColor:
+                    
                     var color = UnityEngine.Random.Range(3, 6);
                     var cellType = (CellType) (1 << color) | CellType.Virus;
-                    _board[x, y] = cellType;
+                    
+                    var i = 1;
+                    while (i < GameConstants.MinConsecutiveCells && x - i >= 0)
+                    {   
+                        if (Cell.HaveSameColor(_board[x - i, y], cellType))
+                            i++;
+                        else
+                            break;
+                    }
+                    
+                    while (i < GameConstants.MinConsecutiveCells && y - i >= 0)
+                    {
+                        if (Cell.HaveSameColor(_board[x, y - i], cellType))
+                            i++;
+                        else
+                            break;
+                    }
+                    
+                    if (i < GameConstants.MinConsecutiveCells)
+                        _board[x, y] = cellType;
+                    else
+                        goto trySetColor;
                 }
+            }
+        }
+
+        public void MovePill(Pill pill, MovementDirection direction)
+        {
+            switch (direction)
+            {
+                case MovementDirection.Down:
+                    MovePillDown(pill);
+                    break;
+                case MovementDirection.Left:
+                    MovePillLeft(pill);
+                    break;
+                case MovementDirection.Right:
+                    MovePillRight(pill);
+                    break;
             }
         }
         
@@ -351,6 +390,54 @@ namespace Pills.Assets
             posCell1 = pill.Cells[1].Position;
             _board[posCell0.x, posCell0.y] = pill.Cells[0].Type;
             _board[posCell1.x, posCell1.y] = pill.Cells[1].Type;
+        }
+        
+        public void SplitCell(int x, int y, CellType blownCellType)
+        {
+            var blownCellOrientation = Cell.GetCellOrientation(blownCellType);
+            var splitCellOrientation = Cell.GetCellOrientation(_board[x, y]);
+
+            if (blownCellOrientation == CellType.Left && splitCellOrientation != CellType.Right)
+                return;
+
+            if (blownCellOrientation == CellType.Right && splitCellOrientation != CellType.Left)
+                return;
+
+            if (blownCellOrientation == CellType.Down && splitCellOrientation != CellType.Up)
+                return;
+
+            if (blownCellOrientation == CellType.Up && splitCellOrientation != CellType.Down)
+                return;
+
+            switch (_board[x, y])
+            {
+                case CellType.Empty:
+                case CellType.Wall:
+                case CellType.Virus:
+                case CellType.Red:
+                case CellType.Blue:
+                case CellType.Yellow:
+                    return;
+            }
+
+            if (_board[x, y] == CellType.Empty || _board[x, y] == CellType.Wall)
+                return;
+
+            var isVirus = (_board[x, y] & CellType.Virus) == CellType.Virus;
+            if (isVirus)
+                return;
+
+            _board[x, y] = Cell.GetCellColor(_board[x, y]);
+        }
+        
+        public bool CanSpawnNextPill()
+        {
+            var x0 = 4;
+            var y0 = GameConstants.BoardHeight - 2;
+            var x1 = x0 + 1;
+            var y1 = y0;
+            
+            return _board[x0, y0] == CellType.Empty && _board[x1, y1] == CellType.Empty;
         }
     }
 }
