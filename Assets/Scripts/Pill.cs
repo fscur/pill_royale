@@ -15,29 +15,31 @@ namespace Pills.Assets
     {
         public CellOrientation Orientation;
 
-        public Cell[] Cells { get; set; }
+        public Cell[] Cells { get; private set; }
 
-        public static Pill SpawnPill(int x, int y, CellOrientation orientation)
+        public static Pill SpawnPill(int x, int y, CellOrientation orientation, Random random)
         {
-            var color = UnityEngine.Random.Range(3, 6);
-            CellType cellType0 = (CellType)(1 << color);
-            color = UnityEngine.Random.Range(3, 6);
-            CellType cellType1 = (CellType)(1 << color);
-
-            Vector2 cell1Position = Vector2.zero;
+            var color = random.Range(3, 6);
+            var cellType0 = (CellType)(1 << color);
+            
+            color = random.Range(3, 6);
+            var cellType1 = (CellType)(1 << color);
+            
+            var cell1Position = Vector2Int.zero;
+            
             switch (orientation)
             {
                 case CellOrientation.Left:
-                    cell1Position = new Vector2(x - 1, y);
+                    cell1Position = new Vector2Int(x - 1, y);
                     break;
                 case CellOrientation.Right:
-                    cell1Position = new Vector2(x + 1, y);
+                    cell1Position = new Vector2Int(x + 1, y);
                     break;
                 case CellOrientation.Up:
-                    cell1Position = new Vector2(x, y + 1);
+                    cell1Position = new Vector2Int(x, y + 1);
                     break;
                 case CellOrientation.Down:
-                    cell1Position = new Vector2(x, y - 1);
+                    cell1Position = new Vector2Int(x, y - 1);
                     break;
             }
 
@@ -63,12 +65,10 @@ namespace Pills.Assets
 
             var cell0 = new Cell
             {
-                Position = new Vector2(x, y),
+                Position = new Vector2Int(x, y),
                 Type = cellType0,
                 IsMainCell = true
             };
-
-            //todo: add orientation to celltype (to render pill correctly)
 
             var cell1 = new Cell
             {
@@ -90,32 +90,32 @@ namespace Pills.Assets
 
         public void Translate(int x, int y)
         {
-            Cells[0].Position += new Vector2(x, y);
-            Cells[1].Position += new Vector2(x, y);
+            Cells[0].Position += new Vector2Int(x, y);
+            Cells[1].Position += new Vector2Int(x, y);
         }
 
         public void MoveDown()
         {
-            Cells[0].Position += Vector2.down;
-            Cells[1].Position += Vector2.down;
+            Cells[0].Position += Vector2Int.down;
+            Cells[1].Position += Vector2Int.down;
         }
 
         public void MoveUp()
         {
-            Cells[0].Position += Vector2.up;
-            Cells[1].Position += Vector2.up;
+            Cells[0].Position += Vector2Int.up;
+            Cells[1].Position += Vector2Int.up;
         }
 
         public void MoveLeft()
         {
-            Cells[0].Position += Vector2.left;
-            Cells[1].Position += Vector2.left;
+            Cells[0].Position += Vector2Int.left;
+            Cells[1].Position += Vector2Int.left;
         }
 
         public void MoveRight()
         {
-            Cells[0].Position += Vector2.right;
-            Cells[1].Position += Vector2.right;
+            Cells[0].Position += Vector2Int.right;
+            Cells[1].Position += Vector2Int.right;
         }
         public void RotateCounterClockwise()
         {
@@ -162,8 +162,8 @@ namespace Pills.Assets
 
             Cells[mainCell].Type = mainType;
             Cells[otherCell].Type = otherType;
-            Cells[mainCell].Position = new Vector2(x0, y0);
-            Cells[otherCell].Position = new Vector2(x1, y1);
+            Cells[mainCell].Position = new Vector2Int(x0, y0);
+            Cells[otherCell].Position = new Vector2Int(x1, y1);
         }
 
         public void RotateClockwise()
@@ -211,30 +211,8 @@ namespace Pills.Assets
 
             Cells[mainCell].Type = mainType;
             Cells[otherCell].Type = otherType;
-            Cells[mainCell].Position = new Vector2(x0, y0);
-            Cells[otherCell].Position = new Vector2(x1, y1);
-        }
-
-        public void SwapOrientation()
-        {
-            Cells[0].IsMainCell = !Cells[0].IsMainCell;
-            Cells[1].IsMainCell = !Cells[1].IsMainCell;
-
-            switch (Orientation)
-            {
-                case CellOrientation.Right:
-                    Orientation = CellOrientation.Left;
-                    break;
-                case CellOrientation.Down:
-                    Orientation = CellOrientation.Up;
-                    break;
-                case CellOrientation.Left:
-                    Orientation = CellOrientation.Right;
-                    break;
-                case CellOrientation.Up:
-                    Orientation = CellOrientation.Down;
-                    break;
-            }
+            Cells[mainCell].Position = new Vector2Int(x0, y0);
+            Cells[otherCell].Position = new Vector2Int(x1, y1);
         }
     }
 }
