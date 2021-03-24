@@ -1,22 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace Pills.Assets
 {
-    public enum GameState
-    {
-        WaitingStart,
-        Playing,
-        ResolvingBlows,
-        FallingCells,
-        GameOver
-    }
-
+    //Covid Fighters
+    //Up to four players (local/remote multi-player)
+    //The objective is to eradicate the corona virus and its variants.
+    //The player who eradicates first, wins.
+    //If the virus dominates, player loses.
+    //Every x seconds y person dies. (stats)
+    //Graphs showing the contamination/death curves (stats)
+    //Char special ability! - Player can select between four (maybe more) characters (world leaders)
+    //                        with a special ability and a negative passive effect.
+        // Dr. Bozo Mario (starts with Cloroquina! card from the start) / viruses spread faster 
+        // Coronald Tromb (freezes all other players input for x seconds) / viruses start speed is faster
+        // Valdomiro Sputnik (think about)
+        // Tedros Adhanom (think about)
+    //Event! - all players are affected by same negative/positive event (random)
+        // Examples
+        // - Fake news (death ratio increases)
+        // - New variant (increase consecutive viruses to blow)
+        // - New vaccine (decrease consecutive viruses to blow)
+        // - Carnival! (doubles viruses speed creation)
+        // - Lockdown! (halves viruses speed creation)
+    //Goal card! - whenever a player eliminates x viruses, it gain a card (strategy).
+    //             when it reaches y number of cards he is obliged to use one of them.
+        // Examples
+        // - Train doctors (death ratio is decreased)
+        // - Cloroquina! (50% hospital beds are cleared, some may instantly die)
+        // - Use graduates! (doctors feel rested for some time)
+        // - Expatriate! (send patients abroad to other players)
+    
+    
     public class PlayerController : MonoBehaviour
     {
+        private enum GameState
+        {
+            WaitingStart,
+            Playing,
+            ResolvingBlows,
+            FallingCells,
+            GameOver
+        }
+        
         private enum RoundSpeed
         {
             Low,
@@ -27,60 +55,57 @@ namespace Pills.Assets
         private static int _randomSeed;
 
         [SerializeField, Range(0, GameConstants.MaxDifficulty)] private float _virusLevel = 0;
-        [SerializeField] private RoundSpeed _speed = 0;
-        [SerializeField] private Tilemap _tilemap;
-        [SerializeField] private BoardConfig _boardConfig;
+        [SerializeField] private RoundSpeed _speed = RoundSpeed.Low;
+        [SerializeField] private Tilemap _tilemap = null;
+        [SerializeField] private BoardConfig _boardConfig = null;
+        [SerializeField] private int _playerId = 0;
         
-        [SerializeField] private KeyCode _downKey;
-        [SerializeField] private KeyCode _leftKey;
-        [SerializeField] private KeyCode _rightKey;
-        [SerializeField] private KeyCode _rotateClockwiseKey;
-        [SerializeField] private KeyCode _rotateCounterClockwiseKey;
+        private PlayerControlConfig _playerControl;
         
         private float _roundSpeed;
-        private bool _isPaused;
         private float _inputTime;
-        
         private float _roundTime;
+        
         private Pill _currentPill;
         private Pill _nextPill;
-        private bool[] _keyIsDown;
-        private float[] _timeSinceKeyDown;
 
         private GameState _state;
 
+        private readonly Random _pillRandom = new Random();
         private readonly Board _board = new Board();
-        private readonly Queue<List<Cell>> _toBlowQueue = new Queue<List<Cell>>();
-        private readonly Queue<List<Cell>> _blownQueue = new Queue<List<Cell>>();
-        private readonly Dictionary<Vector2Int, List<Cell>> _cellGroups = new Dictionary<Vector2Int, List<Cell>>(10 * 18);
+        private readonly Queue<List<Cell>> _toBlowQueue = new Queue<List<Cell>>(GameConstants.BlownQueueCapacity);
+        private readonly Queue<List<Cell>> _blownQueue = new Queue<List<Cell>>(GameConstants.BlownQueueCapacity);
+        private readonly Dictionary<Vector2Int, List<Cell>> _cellGroups =
+            new Dictionary<Vector2Int, List<Cell>>(GameConstants.BoardWidth * GameConstants.BoardWidth);
         
-        private Random _pillRandom;
+        private PlayerInputController _input;
         private BoardDrawer _boardDrawer;
-        
+        private float _startTime;
+
         private void Start()
         {
             if (_randomSeed == 0)
-                _randomSeed = UnityEngine.Random.Range(1, 1024);
+                _randomSeed = UnityEngine.Random.Range(GameConstants.MinSeedValue, GameConstants.MaxSeedValue);
             
             UnityEngine.Random.InitState(_randomSeed);
             
             _boardDrawer = new BoardDrawer(_tilemap, _boardConfig.PillTiles);
-            _pillRandom = new Random();
-            _keyIsDown = new bool[5];
-            _timeSinceKeyDown = new float[5];
-
-            _isPaused = true;
             _roundSpeed = GameConstants.RoundSpeeds[(int)_speed];
-            
-            _roundTime = 0.0f;
-            _inputTime = 0.0f;
 
             _board.Reset();
             _board.FillVirusesPositions((int)_virusLevel);
             
-            _nextPill = Pill.SpawnPill(4, GameConstants.BoardHeight + 1, CellOrientation.Right, _pillRandom);
+            _input = new PlayerInputController(_board, GameManager.Get().PlayerControlConfigs[_playerId]);
+            
+            _nextPill = SpawnNextPill();
             
             SetState(GameState.WaitingStart);
+            _startTime = Time.realtimeSinceStartup;
+        }
+
+        private Pill SpawnNextPill()
+        {
+            return Pill.SpawnPill(GameConstants.SpawnPosition.x, GameConstants.BoardHeight + 1, CellOrientation.Right, _pillRandom);
         }
 
         private void SetState(GameState value)
@@ -98,40 +123,25 @@ namespace Pills.Assets
             }
         }
         
-        private void SetCurrentPill(Pill pill)
+        private void Update()
         {
-            _currentPill = pill;
-            _currentPill.Translate(0, -3);
-            var cell0 = _currentPill.Cells[0];
-            var cell1 = _currentPill.Cells[1];
-            _board[(int) cell0.Position.x, (int) cell0.Position.y] = cell0.Type;
-            _board[(int) cell1.Position.x, (int) cell1.Position.y] = cell1.Type;
-            _nextPill = Pill.SpawnPill(4, GameConstants.BoardHeight + 1, CellOrientation.Right, _pillRandom);
-        } 
-
-        public void LateUpdate()
-        {
-            if (_state == GameState.GameOver)
+            if (GameManager.Get().IsPaused)
             {
                 return;
             }
             
-            ResetInputIfNeeded();
-
-            if (Input.GetKeyDown(KeyCode.P))
+            if (_state == GameState.GameOver)
             {
-                if (_state == GameState.WaitingStart)
-                {
-                    SetCurrentPill(_nextPill);
-                    SetState(GameState.Playing);
-                }
-
-                _isPaused = !_isPaused;
-            }
-
-            if (_isPaused)
-            {
+                //todo: show game over 
                 return;
+            }
+            
+            _input.Reset();
+
+            if (_state == GameState.WaitingStart && Time.realtimeSinceStartup - _startTime > 3.0f)
+            {
+                SetCurrentPill(_nextPill);
+                SetState(GameState.Playing);
             }
 
             _inputTime += Time.unscaledDeltaTime;
@@ -139,7 +149,7 @@ namespace Pills.Assets
 
             if (_state == GameState.Playing && _currentPill != null)
             {
-                HandleInput();
+                _input.Update(_currentPill, _inputTime);
             }
 
             if (_inputTime > GameConstants.Input.Speed)
@@ -151,17 +161,6 @@ namespace Pills.Assets
             {
                 return;
             }
-
-            // UnityEngine.Debug.Log("input time: " + _inputTime);
-            // UnityEngine.Debug.Log("input speed: " + _inputSpeed);
-            // UnityEngine.Debug.Log("round time: " + _roundTime);
-            // UnityEngine.Debug.Log("round speed: " + _roundSpeed);
-            // UnityEngine.Debug.Log("keydown down: " + _keyIsDown[(int)InputAction.MoveDown]);
-            // UnityEngine.Debug.Log("keydown left: " + _keyIsDown[(int)InputAction.MoveLeft]);
-            // UnityEngine.Debug.Log("keydown right: " + _keyIsDown[(int)InputAction.MoveRight]);
-            // UnityEngine.Debug.Log("time keydown down: " + _timeSinceKeyDown[(int)InputAction.MoveDown]);
-            // UnityEngine.Debug.Log("time keydown left: " + _timeSinceKeyDown[(int)InputAction.MoveLeft]);
-            // UnityEngine.Debug.Log("time keydown right: " + _timeSinceKeyDown[(int)InputAction.MoveRight]);
 
             _roundTime = 0.0f;
 
@@ -178,138 +177,11 @@ namespace Pills.Assets
                 FallCells();
         }
 
-        private void Update()
+        private void LateUpdate()
         {
             _boardDrawer.Draw(_board, _nextPill);
         }
-
-        private void ResetInputIfNeeded()
-        {
-            if (Input.GetKeyUp(_downKey))
-            {
-                _keyIsDown[(int) MovementDirection.Down] = false;
-                _timeSinceKeyDown[(int) MovementDirection.Down] = 0;
-            }
-
-            if (Input.GetKeyUp(_leftKey))
-            {
-                _keyIsDown[(int) MovementDirection.Left] = false;
-                _timeSinceKeyDown[(int) MovementDirection.Left] = 0;
-            }
-
-            if (Input.GetKeyUp(_rightKey))
-            {
-                _keyIsDown[(int) MovementDirection.Right] = false;
-                _timeSinceKeyDown[(int) MovementDirection.Right] = 0;
-            }
-        }
-
-        private void HandleInput()
-        {
-            HandleMove(_downKey, MovementDirection.Down);
-            HandleMove(_leftKey, MovementDirection.Left);
-            HandleMove(_rightKey, MovementDirection.Right);
-            HandleRotateClockwise();
-            HandleRotateCounterClockwise();
-        }
         
-        private void HandleMove(KeyCode pressedKey, MovementDirection movementDirection)
-        {
-            if (Input.GetKeyDown(pressedKey))
-            {
-                _keyIsDown[(int) movementDirection] = true;
-
-                if (_board.CanMovePill(_currentPill, movementDirection))
-                    _board.MovePill(_currentPill, movementDirection);
-            }
-
-            if (_keyIsDown[(int) movementDirection])
-                _timeSinceKeyDown[(int) movementDirection] += Time.unscaledDeltaTime;
-
-            if (_inputTime <= GameConstants.Input.Speed)
-                return;
-
-            if (!_keyIsDown[(int) movementDirection] || !(_timeSinceKeyDown[(int) movementDirection] > GameConstants.Input.KeyDownSpeed))
-                return;
-
-            if (_board.CanMovePill(_currentPill, movementDirection))
-                _board.MovePill(_currentPill, movementDirection);
-        }
-
-        private void HandleRotateClockwise()
-        {
-            if (!Input.GetKeyDown(_rotateClockwiseKey))
-                return;
-
-            if (_board.CanRotatePill(_currentPill, RotationDirection.Clockwise))
-            {
-                _board.RotatePillClockwise(_currentPill);
-            }
-            else
-            {
-                switch (_currentPill.Orientation)
-                {
-                    case CellOrientation.Up:
-                    case CellOrientation.Down:
-                    {
-                        if (!_board.CanMovePillLeft(_currentPill))
-                            return;
-
-                        _board.MovePillLeft(_currentPill);
-                        _board.RotatePillClockwise(_currentPill);
-                        break;
-                    }
-                    case CellOrientation.Right:
-                    case CellOrientation.Left:
-                    {
-                        if (!_board.CanMovePillDown(_currentPill))
-                            return;
-
-                        _board.MovePillDown(_currentPill);
-                        _board.RotatePillClockwise(_currentPill);
-                        break;
-                    }
-                }
-            }
-        }
-
-        private void HandleRotateCounterClockwise()
-        {
-            if (!Input.GetKeyDown(_rotateCounterClockwiseKey))
-                return;
-
-            if (_board.CanRotatePill(_currentPill, RotationDirection.CounterClockwise))
-            {
-                _board.RotatePillCounterClockwise(_currentPill);
-            }
-            else
-            {
-                switch (_currentPill.Orientation)
-                {
-                    case CellOrientation.Up:
-                    case CellOrientation.Down:
-                    {
-                        if (!_board.CanMovePillRight(_currentPill))
-                            return;
-
-                        _board.MovePillRight(_currentPill);
-                        _board.RotatePillCounterClockwise(_currentPill);
-                        break;
-                    }
-                    case CellOrientation.Right:
-                    case CellOrientation.Left:
-                    {
-                        if (!_board.CanMovePillDown(_currentPill))
-                            return;
-
-                        _board.MovePillDown(_currentPill);
-                        _board.RotatePillCounterClockwise(_currentPill);
-                        break;
-                    }
-                }
-            }
-        }
-
         private void Play()
         {
             if (_board.HasNoVirusLeft())
@@ -342,8 +214,19 @@ namespace Pills.Assets
                 }
             }
 
-            if (!_keyIsDown[0])
+            if (!_input.IsKeyDown(MovementDirection.Down))
                 _board.MovePillDown(_currentPill);
+        }
+        
+        private void SetCurrentPill(Pill pill)
+        {
+            _currentPill = pill;
+            _currentPill.Translate(0, -3);
+            var cell0 = _currentPill.Cells[0];
+            var cell1 = _currentPill.Cells[1];
+            _board[cell0.Position.x, cell0.Position.y] = cell0.Type;
+            _board[cell1.Position.x, cell1.Position.y] = cell1.Type;
+            _nextPill = SpawnNextPill();
         }
 
         private bool ShouldResolveBlows(int x, int y)

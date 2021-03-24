@@ -432,10 +432,10 @@ namespace Pills.Assets
         
         public bool CanSpawnNextPill()
         {
-            var x0 = 4;
-            var y0 = GameConstants.BoardHeight - 2;
-            var x1 = x0 + 1;
-            var y1 = y0;
+            var x0 = GameConstants.SpawnPosition.x;
+            var y0 = GameConstants.SpawnPosition.y;
+            var x1 = GameConstants.SpawnPosition.x + 1;
+            var y1 = GameConstants.SpawnPosition.y;
             
             return _board[x0, y0] == CellType.Empty && _board[x1, y1] == CellType.Empty;
         }
