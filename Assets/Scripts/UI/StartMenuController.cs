@@ -14,9 +14,6 @@ namespace Pills.Assets.UI
     {
         [SerializeField] private TMP_Text[] _buttonTexts;
         [SerializeField] private Image[] _buttonImages;
-        [SerializeField] private AudioSource _audioSource;
-        [SerializeField] private AudioClip _selectClip;
-        [SerializeField] private AudioClip _startClip;
         [SerializeField] private GraphicRaycaster _rayCaster;
 
         [SerializeField] private SceneReference _onlineScene;
@@ -73,7 +70,7 @@ namespace Pills.Assets.UI
             
             _currentSelectedButton = resultText;
             _currentSelectedButtonIndex = index;
-            _audioSource.PlayOneShot(_selectClip);
+            SoundManager.Play(SoundManager.SelectClip);
             return true;
         }
 
@@ -118,7 +115,7 @@ namespace Pills.Assets.UI
             }
             
             _currentSelectedButton = _buttonTexts[_currentSelectedButtonIndex];
-            _audioSource.PlayOneShot(_selectClip);
+            SoundManager.Play(SoundManager.SelectClip);
         }
 
         private void ResetOptions()
@@ -138,25 +135,25 @@ namespace Pills.Assets.UI
         
         public void OnOnlineButtonClicked()
         {
-            _audioSource.PlayOneShot(_startClip);
-            //SceneManager.LoadScene(_onlineScene.name);
+            SoundManager.Play(SoundManager.StartClip);
+            //_sceneTransitionManager.FadeOutThenFadeIn(_onlineScene, SoundManager.StartClip);
         }
         
         public void OnSinglePlayerButtonClicked()
         {
-            _sceneTransitionManager.FadeOutThenFadeIn(_singlePlayerScene, _startClip);
+            _sceneTransitionManager.FadeOutThenFadeIn(_singlePlayerScene, SoundManager.StartClip);
         }
         
         public void OnMultiPlayerButtonClicked()
         {
-            _audioSource.PlayOneShot(_startClip);
-            //SceneManager.LoadScene(_multiPlayerScene.name);
+            SoundManager.Play(SoundManager.StartClip);
+            //_sceneTransitionManager.FadeOutThenFadeIn(_multiPlayerScene, SoundManager.StartClip);
         }
         
         public void OnOptionsButtonClicked()
         {
-            _audioSource.PlayOneShot(_startClip);
-          //  SceneManager.LoadScene(_optionsScene.name);
+            SoundManager.Play(SoundManager.StartClip);
+            //_sceneTransitionManager.FadeOutThenFadeIn(_optionsPlayerScene, SoundManager.StartClip);
         }
     }
     

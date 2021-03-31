@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Pills.Assets.UI
 {
-    public class OptionController : MonoBehaviour
+    public class OptionController : MonoBehaviour, ISelectable
     {
         [SerializeField] protected TMP_Text _titleText;
         [SerializeField] protected TMP_Text _valueText;
@@ -19,7 +19,17 @@ namespace Pills.Assets.UI
 
         private bool _selected = false;
         protected bool _editing = false;
-        
+
+        public bool IsLocked
+        {
+            get { return _editing; }
+        }
+
+        public Vector2 Position
+        {
+            get { return (gameObject.transform as RectTransform).position; }
+        }
+
         public void Select()
         {
             _titleText.color = GameConstants.UI.StartMenu.SelectedOptionColor;

@@ -34,12 +34,18 @@
             <e p="RotationDirection.cs" t="Include" />
           </e>
           <e p="UI" t="Include">
+            <e p="ButtonController.cs" t="Include" />
             <e p="GameSceneController.cs" t="Include" />
+            <e p="HoverBehaviour.cs" t="Include" />
+            <e p="ISelectable.cs" t="Include" />
             <e p="OptionController.cs" t="Include" />
             <e p="OptionsMenuController.cs" t="Include" />
+            <e p="OptionsMenuController2.cs" t="Include" />
             <e p="PrestartController.cs" t="Include" />
             <e p="SceneTransitionManager.cs" t="Include" />
+            <e p="SoundManager.cs" t="Include" />
             <e p="StartMenuController.cs" t="Include" />
+            <e p="UINavigator.cs" t="Include" />
             <e p="UpDownOptionController.cs" t="Include" />
           </e>
         </e>
