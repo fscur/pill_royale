@@ -25,7 +25,6 @@
       <Path>.vscode</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
-      <Path>Temp</Path>
       <Path>Test</Path>
       <Path>UserSettings</Path>
       <Path>build</Path>

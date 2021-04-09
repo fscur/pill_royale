@@ -15,38 +15,50 @@
             <e p="SceneDrawer.cs" t="Include" />
           </e>
           <e p="Game" t="Include">
+            <e p="GameManager.cs" t="Include" />
+            <e p="GameMode.cs" t="Include" />
+            <e p="GameSettings.cs" t="Include" />
+            <e p="PlayerControlConfig.cs" t="Include" />
+            <e p="PlayerControlConfigCollection.cs" t="Include" />
+            <e p="RoundSpeed.cs" t="Include" />
+            <e p="SceneTransitionManager.cs" t="Include" />
+            <e p="SoundManager.cs" t="Include" />
+          </e>
+          <e p="GameConstants.cs" t="Include" />
+          <e p="Gameplay" t="Include">
             <e p="Board.cs" t="Include" />
             <e p="BoardConfig.cs" t="Include" />
             <e p="BoardDrawer.cs" t="Include" />
             <e p="Cell.cs" t="Include" />
+            <e p="CellOrientation.cs" t="Include" />
             <e p="Direction.cs" t="Include" />
-            <e p="GameConstants.cs" t="Include" />
-            <e p="GameManager.cs" t="Include" />
+            <e p="GameOverInfo.cs" t="Include" />
             <e p="MovementDirection.cs" t="Include" />
             <e p="Pill.cs" t="Include" />
             <e p="Player.cs" t="Include" />
-            <e p="PlayerControlConfig.cs" t="Include" />
-            <e p="PlayerControlConfigCollection.cs" t="Include" />
-            <e p="PlayerController - Copy.cs" t="Include" />
             <e p="PlayerController.cs" t="Include" />
             <e p="PlayerInputController.cs" t="Include" />
-            <e p="Random.cs" t="Include" />
             <e p="RotationDirection.cs" t="Include" />
+          </e>
+          <e p="Meta" t="Include">
+            <e p="GameModeVariable.cs" t="Include" />
+            <e p="IntVariable.cs" t="Include" />
+            <e p="RoundSpeedVariable.cs" t="Include" />
           </e>
           <e p="UI" t="Include">
             <e p="ButtonController.cs" t="Include" />
+            <e p="EndGameScreenController.cs" t="Include" />
             <e p="GameSceneController.cs" t="Include" />
-            <e p="HoverBehaviour.cs" t="Include" />
+            <e p="GameSettingsSceneController.cs" t="Include" />
             <e p="ISelectable.cs" t="Include" />
             <e p="OptionController.cs" t="Include" />
-            <e p="OptionsMenuController.cs" t="Include" />
-            <e p="OptionsMenuController2.cs" t="Include" />
             <e p="PrestartController.cs" t="Include" />
-            <e p="SceneTransitionManager.cs" t="Include" />
-            <e p="SoundManager.cs" t="Include" />
-            <e p="StartMenuController.cs" t="Include" />
+            <e p="TitleScreenSceneController.cs" t="Include" />
             <e p="UINavigator.cs" t="Include" />
             <e p="UpDownOptionController.cs" t="Include" />
+          </e>
+          <e p="Utils" t="Include">
+            <e p="Random.cs" t="Include" />
           </e>
         </e>
         <e p="TextMesh Pro" t="Include">

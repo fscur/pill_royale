@@ -1,124 +1,70 @@
 fileFormatVersion: 2
-guid: 8a7540d3697f5a14aa5e2973762c9718
+guid: 0ef33258e8e923f47908df519f5b9ee1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3584907460382716065
-    second: pills_0
+      213: 8885282774751132610
+    second: DefaultPills_0
   - first:
-      213: -1617970301085843317
-    second: pills_1
+      213: 142007939087072394
+    second: DefaultPills_1
   - first:
-      213: -9220095157998199287
-    second: pills_2
+      213: -6124587971804001832
+    second: DefaultPills_2
   - first:
-      213: 1866968654762039141
-    second: pills_3
+      213: 6397626102587352146
+    second: DefaultPills_3
   - first:
-      213: -1417473025009325586
-    second: pills_4
+      213: 2078449142331855479
+    second: DefaultPills_4
   - first:
-      213: -5233683204762190564
-    second: pills_5
+      213: -8748332246426559148
+    second: DefaultPills_5
   - first:
-      213: 6366468522200963073
-    second: pills_6
+      213: -5861643133655359655
+    second: DefaultPills_6
   - first:
-      213: -7679290655258350643
-    second: pills_7
+      213: 1457001736700497598
+    second: DefaultPills_7
   - first:
-      213: 2129271535622625568
-    second: pills_8
+      213: -5296353071847928181
+    second: DefaultPills_8
   - first:
-      213: -1355771813340447763
-    second: pills_9
+      213: -4066476705157213197
+    second: DefaultPills_9
   - first:
-      213: 3875418906337352201
-    second: pills_10
+      213: -6437090186410811113
+    second: DefaultPills_10
   - first:
-      213: 3676524333007465455
-    second: pills_11
+      213: 5609740154560587595
+    second: DefaultPills_11
   - first:
-      213: -8773168729781921219
-    second: pills_12
+      213: -8526418804771290148
+    second: DefaultPills_12
   - first:
-      213: 5328555420122060888
-    second: pills_13
+      213: -8037813213273363161
+    second: DefaultPills_13
   - first:
-      213: 6461628110386324107
-    second: pills_14
+      213: 5134582981953948777
+    second: DefaultPills_14
   - first:
-      213: 6365477789755105472
-    second: pills_15
+      213: 3445770602378353959
+    second: DefaultPills_15
   - first:
-      213: 1408671968733472140
-    second: pills_16
+      213: 1868148383478656343
+    second: DefaultPills_16
   - first:
-      213: 1442023123686764603
-    second: pills_17
+      213: 8892994592160008674
+    second: DefaultPills_17
   - first:
-      213: -7484289052914511282
-    second: pills_0
+      213: 3512752123175090864
+    second: DefaultPills_18
   - first:
-      213: 8454267759515755020
-    second: pills_1
+      213: -5840311071909243485
+    second: DefaultPills_19
   - first:
-      213: 7345089340273961507
-    second: pills_2
-  - first:
-      213: -3005384941595610851
-    second: pills_3
-  - first:
-      213: 3047099147475294310
-    second: pills_4
-  - first:
-      213: 5137969832633186191
-    second: pills_5
-  - first:
-      213: 7721782947206025893
-    second: pills_6
-  - first:
-      213: -1400072633092994206
-    second: pills_7
-  - first:
-      213: 6366700590856915771
-    second: pills_8
-  - first:
-      213: -8174710696537041716
-    second: pills_9
-  - first:
-      213: 5594338298246233565
-    second: pills_10
-  - first:
-      213: -3618044785790538376
-    second: pills_11
-  - first:
-      213: -2870520810579496194
-    second: pills_12
-  - first:
-      213: -665655990536629251
-    second: pills_13
-  - first:
-      213: 7403175225597585186
-    second: pills_14
-  - first:
-      213: -6031238771424715624
-    second: pills_15
-  - first:
-      213: 5701029931855724507
-    second: pills_16
-  - first:
-      213: -8443317974204595912
-    second: pills_17
-  - first:
-      213: -7139223376902678066
-    second: pills_18
-  - first:
-      213: -8663530581113055534
-    second: pills_19
-  - first:
-      213: 6677111208971430646
-    second: pills_20
+      213: -1226851652129459115
+    second: DefaultPills_20
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -163,7 +109,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 21
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -176,7 +122,7 @@ TextureImporter:
   compressionQualitySet: 0
   textureFormatSet: 0
   ignorePngGamma: 0
-  applyGammaDecoding: 1
+  applyGammaDecoding: 0
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -203,30 +149,6 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
-    buildTarget: iPhone
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
-  - serializedVersion: 3
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
-  - serializedVersion: 3
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -237,447 +159,447 @@ TextureImporter:
     allowsAlphaSplitting: 0
     overridden: 0
     androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: pills_0
+      name: DefaultPills_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 126
-        width: 21
-        height: 21
-      alignment: 6
+        y: 48
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e429fa482c6722890800000000000000
-      internalID: -7484289052914511282
+      spriteID: 2cb30fd7b9dde4b70800000000000000
+      internalID: 8885282774751132610
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_1
+      name: DefaultPills_1
       rect:
         serializedVersion: 2
-        x: 21
-        y: 126
-        width: 21
-        height: 21
-      alignment: 6
+        x: 8
+        y: 48
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c0269f11cb7935570800000000000000
-      internalID: 8454267759515755020
+      spriteID: a8cf19cd77388f100800000000000000
+      internalID: 142007939087072394
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_2
+      name: DefaultPills_2
       rect:
         serializedVersion: 2
-        x: 42
-        y: 126
-        width: 21
-        height: 21
-      alignment: 6
+        x: 16
+        y: 48
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 32aa98ac6dffee560800000000000000
-      internalID: 7345089340273961507
+      spriteID: 8d90ef860b7110ba0800000000000000
+      internalID: -6124587971804001832
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_3
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 105
-        width: 21
-        height: 21
-      alignment: 6
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d11b2ee915aba46d0800000000000000
-      internalID: -3005384941595610851
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pills_4
-      rect:
-        serializedVersion: 2
-        x: 21
-        y: 105
-        width: 21
-        height: 21
-      alignment: 6
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 66819a8c788794a20800000000000000
-      internalID: 3047099147475294310
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pills_5
-      rect:
-        serializedVersion: 2
-        x: 42
-        y: 105
-        width: 21
-        height: 21
-      alignment: 6
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f8736c4375cbd4740800000000000000
-      internalID: 5137969832633186191
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pills_6
+      name: DefaultPills_3
       rect:
         serializedVersion: 2
         x: 0
-        y: 84
-        width: 21
-        height: 21
-      alignment: 6
+        y: 40
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5a252e0cda8492b60800000000000000
-      internalID: 7721782947206025893
+      spriteID: 2546c725b0fe8c850800000000000000
+      internalID: 6397626102587352146
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_7
+      name: DefaultPills_4
       rect:
         serializedVersion: 2
-        x: 21
-        y: 84
-        width: 21
-        height: 21
-      alignment: 6
+        x: 8
+        y: 40
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 26b0fbcab51f19ce0800000000000000
-      internalID: -1400072633092994206
+      spriteID: 772d76c9b7228dc10800000000000000
+      internalID: 2078449142331855479
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_8
+      name: DefaultPills_5
       rect:
         serializedVersion: 2
-        x: 42
-        y: 84
-        width: 21
-        height: 21
-      alignment: 6
+        x: 16
+        y: 40
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b3bcb4584701b5850800000000000000
-      internalID: 6366700590856915771
+      spriteID: 45d56aa2c2ea79680800000000000000
+      internalID: -8748332246426559148
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_9
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 63
-        width: 21
-        height: 21
-      alignment: 6
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: cc4d257dee79d8e80800000000000000
-      internalID: -8174710696537041716
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pills_10
-      rect:
-        serializedVersion: 2
-        x: 21
-        y: 63
-        width: 21
-        height: 21
-      alignment: 6
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ddd745cca0513ad40800000000000000
-      internalID: 5594338298246233565
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pills_11
-      rect:
-        serializedVersion: 2
-        x: 42
-        y: 63
-        width: 21
-        height: 21
-      alignment: 6
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 87d2081cf6f1acdc0800000000000000
-      internalID: -3618044785790538376
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: pills_12
+      name: DefaultPills_6
       rect:
         serializedVersion: 2
         x: 0
-        y: 42
-        width: 21
-        height: 21
-      alignment: 6
+        y: 32
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ef2fa0d088cd928d0800000000000000
-      internalID: -2870520810579496194
+      spriteID: 95f5d5250a247aea0800000000000000
+      internalID: -5861643133655359655
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_13
+      name: DefaultPills_7
       rect:
         serializedVersion: 2
-        x: 21
-        y: 42
-        width: 21
-        height: 21
-      alignment: 6
+        x: 8
+        y: 32
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: df31475476d13c6f0800000000000000
-      internalID: -665655990536629251
+      spriteID: ebe09292c5f483410800000000000000
+      internalID: 1457001736700497598
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_14
+      name: DefaultPills_8
       rect:
         serializedVersion: 2
-        x: 42
-        y: 42
-        width: 21
-        height: 21
-      alignment: 6
+        x: 16
+        y: 32
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 22767bbd4ac5db660800000000000000
-      internalID: 7403175225597585186
+      spriteID: b8e847341f29f76b0800000000000000
+      internalID: -5296353071847928181
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_15
+      name: DefaultPills_9
       rect:
         serializedVersion: 2
         x: 0
-        y: 21
-        width: 21
-        height: 21
-      alignment: 6
+        y: 24
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 89c9aa1da4cbc4ca0800000000000000
-      internalID: -6031238771424715624
+      spriteID: 3f314b55bf8f097c0800000000000000
+      internalID: -4066476705157213197
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_16
+      name: DefaultPills_10
       rect:
         serializedVersion: 2
-        x: 21
-        y: 21
-        width: 21
-        height: 21
-      alignment: 6
+        x: 8
+        y: 24
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bdf312684802e1f40800000000000000
-      internalID: 5701029931855724507
+      spriteID: 711a4d3a49cdaa6a0800000000000000
+      internalID: -6437090186410811113
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_17
+      name: DefaultPills_11
       rect:
         serializedVersion: 2
-        x: 42
-        y: 21
-        width: 21
-        height: 21
-      alignment: 6
+        x: 16
+        y: 24
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8314ddd790f43da80800000000000000
-      internalID: -8443317974204595912
+      spriteID: b4724dae2fcc9dd40800000000000000
+      internalID: 5609740154560587595
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_18
+      name: DefaultPills_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 16
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd3856f95431ca980800000000000000
+      internalID: -8526418804771290148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DefaultPills_13
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 16
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 72d66ebf773f37090800000000000000
+      internalID: -8037813213273363161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DefaultPills_14
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 16
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96c81259404b14740800000000000000
+      internalID: 5134582981953948777
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DefaultPills_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 8
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 72dde3c3b16d1df20800000000000000
+      internalID: 3445770602378353959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DefaultPills_16
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 8
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75d27f09e0ffce910800000000000000
+      internalID: 1868148383478656343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DefaultPills_17
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 8
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e9ca27e6734a6b70800000000000000
+      internalID: 8892994592160008674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DefaultPills_18
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 21
-        height: 21
-      alignment: 6
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ec91d87f9226cec90800000000000000
-      internalID: -7139223376902678066
+      spriteID: 0bab9d5d17dcfb030800000000000000
+      internalID: 3512752123175090864
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_19
+      name: DefaultPills_19
       rect:
         serializedVersion: 2
-        x: 21
+        x: 8
         y: 0
-        width: 21
-        height: 21
-      alignment: 6
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2d6d50c76d4f4c780800000000000000
-      internalID: -8663530581113055534
+      spriteID: 3a5911df50c03fea0800000000000000
+      internalID: -5840311071909243485
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: pills_20
+      name: DefaultPills_20
       rect:
         serializedVersion: 2
-        x: 42
+        x: 16
         y: 0
-        width: 21
-        height: 21
-      alignment: 6
+        width: 8
+        height: 8
+      alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6fa6588844dd9ac50800000000000000
-      internalID: 6677111208971430646
+      spriteID: 554f8ba2ce859fee0800000000000000
+      internalID: -1226851652129459115
       vertices: []
       indices: 
       edges: []
@@ -685,7 +607,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 0dd3fbaebddd2224a964b20c0a39d49a
+    spriteID: 715f4e03da3818d4c9da2d5e798ee744
     internalID: 0
     vertices: []
     indices: 

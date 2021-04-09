@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Pills.Assets;
-using TMPro;
+﻿using System.Collections.Generic;
+using Pills.Assets.Meta;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,12 +13,13 @@ namespace Pills.Assets.UI
         [SerializeField] private int _minValue;
         [SerializeField] private int _maxValue;
         [SerializeField] private GraphicRaycaster _rayCaster;
+        [SerializeField] private IntVariable _value;
         
         private readonly List<RaycastResult> _results = new List<RaycastResult>(16);
         private PointerEventData _pointerEventData;
         private EventSystem _eventSystem;
         
-        private int _currentValue;
+        //private int _currentValue;
         private bool _isDirty = true;
 
         private void Start()
@@ -40,7 +39,7 @@ namespace Pills.Assets.UI
             if (!_isDirty)
                 return;
 
-            _valueText.text = _currentValue.ToString();
+            _valueText.text = _value.Value.ToString();
             
             if (handled)
                 return;
@@ -65,14 +64,14 @@ namespace Pills.Assets.UI
         
         private void ValidateCurrentValue()
         {
-            if (_currentValue < _minValue)
+            if (_value.Value < _minValue)
             {
-                _currentValue = _minValue;
+                _value.Value = _minValue;
                 InvokeOnErrorEvent();
             }
-            else if (_currentValue > _maxValue)
+            else if (_value.Value > _maxValue)
             {
-                _currentValue = _maxValue;
+                _value.Value = _maxValue;
                 InvokeOnErrorEvent();
             }
             else
@@ -88,12 +87,12 @@ namespace Pills.Assets.UI
         
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                _currentValue--;
+                _value.Value--;
                 _isDirty = true;
             }
             else if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                _currentValue++;
+                _value.Value++;
                 _isDirty = true;
             }
             else
@@ -125,13 +124,13 @@ namespace Pills.Assets.UI
         
         public void OnUpButtonClicked()
         {
-            if (_currentValue == _maxValue)
+            if (_value.Value == _maxValue)
             {
                 InvokeOnErrorEvent();
                 return;
             }
             
-            _currentValue++;
+            _value.Value++;
             _isDirty = true;
             
             ValidateCurrentValue();
@@ -139,13 +138,13 @@ namespace Pills.Assets.UI
         
         public void OnDownButtonClicked()
         {
-            if (_currentValue == _minValue)
+            if (_value.Value == _minValue)
             {
                 InvokeOnErrorEvent();
                 return;
             }
 
-            _currentValue--;
+            _value.Value--;
             _isDirty = true;
             
             ValidateCurrentValue();
