@@ -144,10 +144,10 @@ namespace Pills.Assets.Gameplay
                     case CellOrientation.Up:
                     case CellOrientation.Down:
                     {
-                        if (!_board.CanMovePillRight(pill))
+                        if (!_board.CanMovePillLeft(pill))
                             return;
 
-                        _board.MovePillRight(pill);
+                        _board.MovePillLeft(pill);
                         _board.RotatePillCounterClockwise(pill);
                         break;
                     }

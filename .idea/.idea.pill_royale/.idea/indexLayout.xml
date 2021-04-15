@@ -5,6 +5,7 @@
     <explicitIncludes>
       <Path>Library/PackageCache/com.johannesmp.unityscenereference@1.1.1</Path>
       <Path>Library/PackageCache/com.unity.2d.pixel-perfect@3.0.2</Path>
+      <Path>Library/PackageCache/com.unity.2d.tilemap.extras@1.6.4-preview</Path>
       <Path>Library/PackageCache/com.unity.ads@3.4.7</Path>
       <Path>Library/PackageCache/com.unity.analytics@3.3.5</Path>
       <Path>Library/PackageCache/com.unity.collab-proxy@1.3.8</Path>
@@ -25,6 +26,7 @@
       <Path>.vscode</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
+      <Path>Temp</Path>
       <Path>Test</Path>
       <Path>UserSettings</Path>
       <Path>build</Path>

@@ -115,18 +115,13 @@ namespace Pills.Assets.Gameplay
                     _currentSpeed = GameConstants.RoundSpeeds[GameManager.Settings.RoundSpeed.Value];
                     break;
                 case GameState.FallingCells:
-                    _currentSpeed /= 2.0f;
+                    _currentSpeed = GameConstants.RoundSpeeds[GameManager.Settings.RoundSpeed.Value] / 2;
                     break;
             }
         }
         
         private void Update()
         {   
-            if (GameManager.IsPaused)
-            {
-                return;
-            }
-            
             if (_state == GameState.GameOver)
             {
                 return;
@@ -157,9 +152,17 @@ namespace Pills.Assets.Gameplay
             {
                 return;
             }
+            
+            if (GameManager.IsPaused)
+            {
+                _input.Update(_currentPill, _inputTime);
+                
+                return;
+            }
 
             _roundTime = 0.0f;
 
+            
             if (_state == GameState.WaitingStart)
                 return;
 
@@ -183,7 +186,7 @@ namespace Pills.Assets.Gameplay
             if (_board.HasNoVirusLeft())
             {
                 SetState(GameState.GameOver);
-                GameOver?.Invoke(new GameOverInfo { Winner = Player});
+                //GameOver?.Invoke(new GameOverInfo { Winner = Player});
                 return;
             }
             
@@ -203,7 +206,7 @@ namespace Pills.Assets.Gameplay
                     if (!_board.CanSpawnNextPill())
                     {
                         SetState(GameState.GameOver);
-                        GameOver?.Invoke(new GameOverInfo { Winner = null});
+                        //GameOver?.Invoke(new GameOverInfo { Winner = null});
                         return;
                     }
                     
@@ -429,20 +432,20 @@ namespace Pills.Assets.Gameplay
                 }
             }
 
-            if (fallenCells != 0)
-            {
-                CheckBlows(Direction.Vertical);
-                CheckBlows(Direction.Horizontal);
-
-                if (_toBlowQueue.Count <= 0) 
-                    return;
+            if (fallenCells != 0) 
+                return;
+            
+            CheckBlows(Direction.Vertical);
+            CheckBlows(Direction.Horizontal);
                 
+            if (_toBlowQueue.Count > 0)
+            {
                 SetState(GameState.ResolvingBlows);
                 _cellGroups.Clear();
 
                 return;
             }
-
+                
             _cellGroups.Clear();
             SetState(GameState.Playing);
             SetCurrentPill(_nextPill);

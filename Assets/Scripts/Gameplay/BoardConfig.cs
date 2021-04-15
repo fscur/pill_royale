@@ -7,7 +7,7 @@ namespace Pills.Assets.Gameplay
     public class BoardConfig : ScriptableObject
     {
         public Vector2Int[] PlayerPositions;
-        public Tile[] PillTiles;
+        public TileBase[] PillTiles;
         public Tilemap TileMap;
     }
 }

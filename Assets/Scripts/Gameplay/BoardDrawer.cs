@@ -6,7 +6,7 @@ namespace Pills.Assets.Gameplay
     public class BoardDrawer
     {
         private readonly Tilemap _tileMap;
-        private readonly Tile[] _pillTiles;
+        private readonly TileBase[] _pillTiles;
         private Vector2Int _offset;
 
         public Vector2Int Offset
@@ -15,7 +15,7 @@ namespace Pills.Assets.Gameplay
             set { _offset = value; }
         }
 
-        public BoardDrawer(Tilemap tileMap, Tile[] pillTiles, Vector2Int offset)
+        public BoardDrawer(Tilemap tileMap, TileBase[] pillTiles, Vector2Int offset)
         {
             _tileMap = tileMap;
             _pillTiles = pillTiles;
@@ -55,14 +55,14 @@ namespace Pills.Assets.Gameplay
             SetTile(x1, y1, GetTile(cellType1));
         }
         
-        private void SetTile(int x, int y, Tile tile)
+        private void SetTile(int x, int y, TileBase tile)
         {
             _tileMap.SetTile(new Vector3Int(x + _offset.x, y + _offset.y, 0), tile);
         }
 
-        private Tile GetTile(CellType cellType)
+        private TileBase GetTile(CellType cellType)
         {
-            Tile tile;
+            TileBase tile;
 
             var tileRotation = Quaternion.identity;
 

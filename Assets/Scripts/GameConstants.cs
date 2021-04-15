@@ -36,6 +36,7 @@ namespace Pills.Assets
         
         static GameConstants()
         {
+            //RoundSpeeds[0] = 5.0f;
             RoundSpeeds[0] = 1.0f;
             RoundSpeeds[1] = 0.75f;
             RoundSpeeds[2] = 0.5f;

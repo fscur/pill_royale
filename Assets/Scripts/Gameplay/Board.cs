@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace Pills.Assets.Gameplay
 {
@@ -11,6 +12,12 @@ namespace Pills.Assets.Gameplay
         {
             get { return _board[x, y]; }
             set { _board[x, y] = value; }
+        }
+        
+        public CellType this[Vector2Int position]
+        {
+            get { return _board[position.x, position.y]; }
+            set { _board[position.x, position.y] = value; }
         }
 
         static Board()
@@ -241,15 +248,19 @@ namespace Pills.Assets.Gameplay
                 x0 = pill.Cells[mainCell].Position.x - 1;
                 y0 = pill.Cells[mainCell].Position.y;
             }
-            else
+            else if (pill.Orientation == CellOrientation.Down)
             {
-                x0 = pill.Cells[mainCell].Position.x - 1;
-                y0 = pill.Cells[mainCell].Position.y;
                 x1 = pill.Cells[otherCell].Position.x - 1;
                 y1 = pill.Cells[otherCell].Position.y;
 
-                if (_board[x1, y1] != CellType.Empty)
-                    return false;
+                return _board[x1, y1] == CellType.Empty;
+            }
+            else if (pill.Orientation == CellOrientation.Up)
+            {
+                x1 = pill.Cells[otherCell].Position.x - 1;
+                y1 = pill.Cells[otherCell].Position.y;
+
+                return _board[x1, y1] == CellType.Empty;
             }
 
             return _board[x0, y0] == CellType.Empty;
@@ -282,8 +293,7 @@ namespace Pills.Assets.Gameplay
                 x1 = pill.Cells[otherCell].Position.x + 1;
                 y1 = pill.Cells[otherCell].Position.y;
 
-                if (_board[x1, y1] != CellType.Empty)
-                    return false;
+                return _board[x1, y1] == CellType.Empty;
             }
 
             return _board[x0, y0] == CellType.Empty;
@@ -368,9 +378,10 @@ namespace Pills.Assets.Gameplay
             _board[posCell1.x, posCell1.y] = CellType.Empty;
 
             pill.RotateClockwise();
-
+            
             posCell0 = pill.Cells[0].Position;
             posCell1 = pill.Cells[1].Position;
+            
             _board[posCell0.x, posCell0.y] = pill.Cells[0].Type;
             _board[posCell1.x, posCell1.y] = pill.Cells[1].Type;
         }

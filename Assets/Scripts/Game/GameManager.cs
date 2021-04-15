@@ -31,7 +31,7 @@ namespace Pills.Assets.Managers
             }
         }
         
-        public static Tile[] PillTiles
+        public static TileBase[] PillTiles
         {
             get
             {
