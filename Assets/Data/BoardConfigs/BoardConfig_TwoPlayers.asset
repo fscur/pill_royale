@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57dffa7c2a4843678185fb47bf9de699, type: 3}
+  m_Name: BoardConfig_TwoPlayers
+  m_EditorClassIdentifier: 
+  PlayerPositions:
+  - {x: 0, y: 8}
+  - {x: 10, y: 8}
+  PillTiles:
+  - {fileID: 11400000, guid: c4dc473a96acb2b46bdaf96017550ff8, type: 2}
+  - {fileID: 11400000, guid: 9e5f439db29083e46ac586f612fc3550, type: 2}
+  - {fileID: 11400000, guid: 1abde14834a3c794e88c0e77e2028ad5, type: 2}
+  - {fileID: 11400000, guid: 09149edfea64bf541aa998b22780fa50, type: 2}
+  - {fileID: 11400000, guid: 738638eb5d0d26f49af2380f46e74b93, type: 2}
+  - {fileID: 11400000, guid: a579bfb60f38d9347b8324448945bedd, type: 2}
+  - {fileID: 11400000, guid: 1d93cf4a185008d488e1c8292301afee, type: 2}
+  - {fileID: 11400000, guid: 2721e796244dc824f832103b75071fa8, type: 2}
+  - {fileID: 11400000, guid: d894b07bc85e1124d9e794a702ebb845, type: 2}
+  - {fileID: 11400000, guid: 5bb277d7932599d4ab246864c35c905a, type: 2}
+  - {fileID: 11400000, guid: 49fbf2fa6a18cc9418aefeaf17c13429, type: 2}
+  - {fileID: 11400000, guid: 4663aa0127a9e114c80f4d90afcccfc5, type: 2}
+  - {fileID: 11400000, guid: 736f627bdf17e664280a37b1b2eb5110, type: 2}
+  - {fileID: 11400000, guid: 738599cb7c9f5ac48886aa334a30e565, type: 2}
+  - {fileID: 11400000, guid: 604017b91a72ae24caba7fcd38f1e949, type: 2}
+  - {fileID: 11400000, guid: c9627d4bfc98eff4ca64e22a947aafc7, type: 2}
+  - {fileID: 11400000, guid: 5b63b750b08dce44cbf6722833d8479e, type: 2}
+  - {fileID: 11400000, guid: 9d3c459aa7f93d44db9fcae4db6035f3, type: 2}
+  - {fileID: 11400000, guid: b12cbf4d4411e3c4f9bab010a291f669, type: 2}
+  - {fileID: 11400000, guid: 41ada10b0cf287d449d7823aabc65170, type: 2}
+  - {fileID: 11400000, guid: 8356dab57cd458d42be5e8a6f238bd3e, type: 2}
+  - {fileID: 11400000, guid: c2d54ea1d7c2e0c4a98ec94946e47a24, type: 2}
+  TileMap: {fileID: 7510092091755162726, guid: 01962124081af70439aec6569ab17dbe, type: 3}

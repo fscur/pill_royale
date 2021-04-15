@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacaef224da54a468a17eb584a5f554e, type: 3}
+  m_Name: PlayerControlConfigCollection
+  m_EditorClassIdentifier: 
+  PlayerControlConfigs:
+  - {fileID: 11400000, guid: d0167da61041e844fb1bd92266a6577f, type: 2}
+  - {fileID: 11400000, guid: 326f62c3a418ed641b4644dcc768b0a7, type: 2}
