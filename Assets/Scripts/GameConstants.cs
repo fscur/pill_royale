@@ -14,8 +14,8 @@ namespace Pills.Assets
         {
             public class StartMenu
             {
-                public static Color SelectedOptionColor = new Color(1, 0.3598299f, 0, 1);
-                public static Color OptionColor = Color.white;
+                //public static Color SelectedOptionColor = new Color(1, 0.3598299f, 0, 1);
+                //public static Color OptionColor = Color.white;
             }
         }
 

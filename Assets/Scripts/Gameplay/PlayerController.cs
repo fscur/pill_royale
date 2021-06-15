@@ -112,14 +112,28 @@ namespace Pills.Assets.Gameplay
             switch (value)
             {
                 case GameState.Playing:
-                    _currentSpeed = GameConstants.RoundSpeeds[GameManager.Settings.RoundSpeed.Value];
+                    ResetPlayingState();
                     break;
                 case GameState.FallingCells:
-                    _currentSpeed = GameConstants.RoundSpeeds[GameManager.Settings.RoundSpeed.Value] / 2;
+                    ResetFallingCellsState();
                     break;
             }
         }
+
+        private void ResetPlayingState()
+        {
+            if (_comboCount > 1)
+                UnityEngine.Debug.Log("Combo");
+            
+            _comboCount = 0;
+            _currentSpeed = GameConstants.RoundSpeeds[GameManager.Settings.RoundSpeed.Value];
+        }
         
+        private void ResetFallingCellsState()
+        {
+            _currentSpeed = GameConstants.RoundSpeeds[GameManager.Settings.RoundSpeed.Value] / 2;
+        }
+
         private void Update()
         {   
             if (_state == GameState.GameOver)
@@ -316,15 +330,22 @@ namespace Pills.Assets.Gameplay
             return blownPositions;
         }
 
+
+        private int _comboCount = 0; 
         private void ResolveBlows()
         {
             CheckBlows(Direction.Vertical);
             CheckBlows(Direction.Horizontal);
 
+            if (_blownQueue.Count > 1)
+                UnityEngine.Debug.Log("COMBO");
+            
             while (_blownQueue.Count > 0)
             {
                 var blownGroup = _blownQueue.Dequeue();
 
+                _comboCount++;
+                
                 foreach (var blownCell in blownGroup)
                 {
                     var x = blownCell.Position.x;

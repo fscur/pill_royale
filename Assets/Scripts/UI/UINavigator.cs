@@ -2,23 +2,26 @@
 using System.Linq;
 using Pills.Assets.Managers;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Pills.Assets.UI
 {
     public class UINavigator : MonoBehaviour
     {
-        [SerializeField] private GameObject[] _selectableObjects;
-        private ISelectable[] _selectables;
+        [SerializeField] private Selectable[] _selectables = null;
+        
+        public Selectable Current { get; set; }
 
-        public ISelectable Current { get; set; }
-
-        private void Start()
+        public Selectable[] Selectables
         {
-            _selectables = new ISelectable[_selectableObjects.Length];
-            
-            for (int i = 0; i < _selectableObjects.Length; i++)
+            get { return _selectables; }
+        }
+        
+        private void Start()
+        {   
+            for (var i = 0; i < _selectables.Length; i++)
             {
-                _selectables[i] = _selectableObjects[i].GetComponent<ISelectable>();
+                _selectables[i] = _selectables[i].GetComponent<Selectable>();
             }
 
             if (_selectables.Length <= 0) 
@@ -32,24 +35,22 @@ namespace Pills.Assets.UI
         {
             if (_selectables.Length == 0)
                 return;
-            
+
             var next = _selectables
-                .Where(s => Vector2.Dot(s.Position - Current.Position, direction) > 0)
-                .OrderBy(s => Vector2.Dot(s.Position - Current.Position, direction))
-                .OrderBy(s => Vector2.Distance(Current.Position, s.Position))
+                .Where(s => DotProduct(s, direction) > 0)
+                .OrderBy(s=> DotProduct(s, direction))
+                .OrderBy(Distance)
                 .FirstOrDefault();
 
             if (next == null)
                 return;
 
-            for (int i = 0; i < _selectables.Length; i++)
-            {
-                _selectables[i].Reset();
-            }
-
             next.Select();
             Current = next;
             SoundManager.Play(SoundManager.SelectClip);
         }
+
+        private float Distance(Selectable selectable) => Vector2.Distance(((RectTransform) Current.gameObject.transform).position, ((RectTransform) selectable.gameObject.transform).position);
+        private float DotProduct(Selectable selectable, Vector3 direction) => Vector2.Dot(((RectTransform) selectable.gameObject.transform).position - ((RectTransform) Current.gameObject.transform).position, direction);
     }
 }

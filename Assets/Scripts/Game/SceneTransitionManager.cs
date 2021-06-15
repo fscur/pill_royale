@@ -36,25 +36,25 @@ namespace Pills.Assets.Managers
             DontDestroyOnLoad(this);
         } 
 
-        public void SkipTransition(SceneReference nextScene)
+        public static void SkipTransition(SceneReference nextScene)
         {
             SceneManager.LoadScene(nextScene);
         }
 
-        public void FadeIn()
+        public static void FadeIn()
         {
-            _animator.SetTrigger(FadeInTrigger);
+            _instance._animator.SetTrigger(FadeInTrigger);
         }
         
-        public void FadeOutThenFadeIn(SceneReference nextScene, AudioClip transitionSound)
+        public static void FadeOutThenFadeIn(SceneReference nextScene, AudioClip transitionSound)
         {
-            StartCoroutine(StartTransition(nextScene, transitionSound));
+            _instance.StartCoroutine(StartTransition(nextScene, transitionSound));
         }
         
-        private IEnumerator StartTransition(SceneReference scene, AudioClip transitionSound)
+        private static IEnumerator StartTransition(SceneReference scene, AudioClip transitionSound)
         {
-            _nextScene = scene;
-            _animator.SetTrigger(FadeOutTrigger);
+            _instance._nextScene = scene;
+            _instance._animator.SetTrigger(FadeOutTrigger);
             SoundManager.Play(transitionSound);
             
             while (SoundManager.IsPlaying)
@@ -63,10 +63,10 @@ namespace Pills.Assets.Managers
 
         public void OnFadeOutComplete()
         {
-            StartCoroutine(LoadScene(_nextScene));
+            StartCoroutine(LoadScene(_instance._nextScene));
         }
 
-        private IEnumerator LoadScene(SceneReference scene)
+        private static IEnumerator LoadScene(SceneReference scene)
         {
             var asyncOp = SceneManager.LoadSceneAsync(scene.ScenePath, LoadSceneMode.Single);
 

@@ -1,11 +1,11 @@
 ﻿using System;
-using Pills.Assets;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Pills.Assets.UI
 {
-    public class OptionController : MonoBehaviour, ISelectable
+    public class OptionController : Selectable
     {
         [SerializeField] protected TMP_Text _titleText;
         [SerializeField] protected TMP_Text _valueText;
@@ -30,16 +30,16 @@ namespace Pills.Assets.UI
             get { return (gameObject.transform as RectTransform).position; }
         }
 
-        public void Select()
+        public override  void Select()
         {
-            _titleText.color = GameConstants.UI.StartMenu.SelectedOptionColor;
+            //_titleText.color = GameConstants.UI.StartMenu.SelectedOptionColor;
             _selected = true;
         }
 
         public void Reset()
         {
-            _valueText.color = GameConstants.UI.StartMenu.OptionColor;
-            _titleText.color = GameConstants.UI.StartMenu.OptionColor;
+            // _valueText.color = GameConstants.UI.StartMenu.OptionColor;
+            // _titleText.color = GameConstants.UI.StartMenu.OptionColor;
             _selected = false;
         }
 

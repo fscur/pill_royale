@@ -15,6 +15,7 @@
             <e p="SceneDrawer.cs" t="Include" />
           </e>
           <e p="Game" t="Include">
+            <e p="CameraController.cs" t="Include" />
             <e p="GameManager.cs" t="Include" />
             <e p="GameMode.cs" t="Include" />
             <e p="GameSettings.cs" t="Include" />
@@ -46,15 +47,14 @@
             <e p="RoundSpeedVariable.cs" t="Include" />
           </e>
           <e p="UI" t="Include">
-            <e p="ButtonController.cs" t="Include" />
             <e p="EndGameScreenController.cs" t="Include" />
             <e p="GameSceneController.cs" t="Include" />
             <e p="GameSettingsSceneController.cs" t="Include" />
-            <e p="ISelectable.cs" t="Include" />
             <e p="OptionController.cs" t="Include" />
             <e p="PrestartController.cs" t="Include" />
             <e p="TitleScreenSceneController.cs" t="Include" />
             <e p="UINavigator.cs" t="Include" />
+            <e p="UiSceneController.cs" t="Include" />
             <e p="UpDownOptionController.cs" t="Include" />
           </e>
           <e p="Utils" t="Include">

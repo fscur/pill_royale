@@ -46,20 +46,20 @@ namespace Pills.Assets.UI
             
             if (_editing)
             {
-                _upButton.image.color = GameConstants.UI.StartMenu.SelectedOptionColor;
-                _downButton.image.color = GameConstants.UI.StartMenu.SelectedOptionColor;
+                // _upButton.image.color = GameConstants.UI.StartMenu.SelectedOptionColor;
+                // _downButton.image.color = GameConstants.UI.StartMenu.SelectedOptionColor;
             }
             else
             {
-                _upButton.image.color = GameConstants.UI.StartMenu.OptionColor;
-                _downButton.image.color = GameConstants.UI.StartMenu.OptionColor;
+                // _upButton.image.color = GameConstants.UI.StartMenu.OptionColor;
+                // _downButton.image.color = GameConstants.UI.StartMenu.OptionColor;
             }
         }
 
         private void Reset()
         {
-            _upButton.image.color = GameConstants.UI.StartMenu.OptionColor;
-            _downButton.image.color = GameConstants.UI.StartMenu.OptionColor;
+            // _upButton.image.color = GameConstants.UI.StartMenu.OptionColor;
+            // _downButton.image.color = GameConstants.UI.StartMenu.OptionColor;
         }
         
         private void ValidateCurrentValue()
@@ -117,7 +117,7 @@ namespace Pills.Assets.UI
             if (button == null)
                 return false;
 
-            button.image.color = GameConstants.UI.StartMenu.SelectedOptionColor;
+            //button.image.color = GameConstants.UI.StartMenu.SelectedOptionColor;
             
             return true;
         }

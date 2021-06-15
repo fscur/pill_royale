@@ -9,12 +9,9 @@ namespace Pills.Assets.UI
         [SerializeField] private SceneReference _endGameScreenScene;
         [SerializeField] private Transform _playersTransform;
         [SerializeField] private Transform _tileMapTransform;
-        
-        private SceneTransitionManager _sceneTransitionManager;
+
         private void Start()
         {
-            _sceneTransitionManager = SceneTransitionManager.Get();
-
             var map = GameManager.TileMap;
             map.transform.SetParent(_tileMapTransform);
             
@@ -28,7 +25,7 @@ namespace Pills.Assets.UI
 
         private void PlayerControllerOnGameOver(GameOverInfo gameOverInfo)
         {
-            _sceneTransitionManager.FadeOutThenFadeIn(_endGameScreenScene, SoundManager.GameOverClip);
+            SceneTransitionManager.FadeOutThenFadeIn(_endGameScreenScene, SoundManager.GameOverClip);
         }
     }
 }

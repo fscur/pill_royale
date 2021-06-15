@@ -10,36 +10,23 @@ namespace Pills.Assets.UI
     public class GameSettingsSceneController : MonoBehaviour
     {
         [SerializeField] private OptionController[] _options;
-        [SerializeField] private GameObject[] _navigables;
-        private ISelectable[] _selectables;
-
-        private ISelectable _currentSelection;
-        private bool _inputLocked;
-        
         [SerializeField] private GraphicRaycaster _rayCaster;
         [SerializeField] private SceneReference _gameScene;
         [SerializeField] private SceneReference _titleScreenScene;
+        [SerializeField] private UINavigator _navigator;
         
+        private Selectable _currentSelection;
+        private bool _inputLocked;
         private readonly List<RaycastResult> _results = new List<RaycastResult>(16);
         private PointerEventData _pointerEventData;
         private EventSystem _eventSystem;
-        private SceneTransitionManager _sceneTransitionManager;
 
-        [SerializeField] private UINavigator _navigator;
         private void Start()
         {
             _eventSystem = GetComponent<EventSystem>();
             _pointerEventData = new PointerEventData(_eventSystem);
-            _sceneTransitionManager = SceneTransitionManager.Get();
 
-            _selectables = new ISelectable[_navigables.Length];
-            
-            for (int i = 0; i < _navigables.Length; i++)
-            {
-                _selectables[i] = _navigables[i].GetComponent<ISelectable>();
-            }
-
-            _currentSelection = _selectables[0];
+            _currentSelection = _navigator.Selectables[0];
             
             for (int i = 0; i < _options.Length; i++)
             {
@@ -138,9 +125,9 @@ namespace Pills.Assets.UI
             if (_results.Count <= 0)
                 return false;
         
-            var selection = _results[0].gameObject.GetComponent<ISelectable>();
+            var selection = _results[0].gameObject.GetComponent<Selectable>();
 
-            var index = Array.IndexOf(_selectables, selection);
+            var index = Array.IndexOf(_navigator.Selectables, selection);
         
             if (index < 0) 
                 return false;
@@ -156,30 +143,21 @@ namespace Pills.Assets.UI
                 }
             }
 
-            ResetOptions();
             selection.Select();
             _currentSelection = selection;
             _navigator.Current = selection;
             SoundManager.Play(SoundManager.SelectClip);
             return true;
         }
-        
-        private void ResetOptions()
-        {
-            for (var i = 0; i < _selectables.Length; i++)
-            {
-                _selectables[i].Reset();
-            }
-        }
 
         public void OnBackButtonClicked()
         {
-            _sceneTransitionManager.FadeOutThenFadeIn(_titleScreenScene, SoundManager.BackClip);
+            SceneTransitionManager.FadeOutThenFadeIn(_titleScreenScene, SoundManager.BackClip);
         }
         
         public void OnPlayButtonClicked()
         {
-            _sceneTransitionManager.FadeOutThenFadeIn(_gameScene, SoundManager.StartClip);
+            SceneTransitionManager.FadeOutThenFadeIn(_gameScene, SoundManager.StartClip);
         }
     }
 }
